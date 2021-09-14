@@ -416,7 +416,7 @@ def make_libgtest():
     return value
 
 
-def make_unit_test(unit_test_directory):
+def make_unit_test(unit_test_directory, ldadd=[]):
     """Creates the Makefile segment for a particular unit test. Will
     include all the c++ files in the directory as SOURCES, and all
     the other files as EXTRA_DIST. Only files being tracked by git
@@ -451,7 +451,8 @@ def make_unit_test(unit_test_directory):
     # in a separate subdirectory
     source_files = [f for f in only_makeable_files if f.endswith("_test.cpp")
                     ] + ["tests/unit/gtest_main_run_all.cpp"]
-    ldadd = ["libcasm.la", "libcasmtesting.la"] + all_boost_LDADD_flags()
+    # ldadd = ["libcasm.la", "libcasmtesting.la"] + all_boost_LDADD_flags()
+    ldadd.append("libcasmtesting.la")
 
     value = basic_maker_string("TESTS", "+=", [test_name])
     value += "\n"
@@ -523,9 +524,32 @@ def make_libcasmtesting():
     )
 
 
-def make_aggregated_unit_test():
+def make_aggregated_unit_test(test_config):
     """Create a jumbo Makefile that has everything you need to
     run anything within unit tests.
+    Parameters
+    ----------
+    test_config : Example:
+
+        [
+            {
+                "directory": "tests/unit/casm_io",
+                "ldadd": [
+                    "libcasm_global.la"
+                ],
+            {
+                "directory": "tests/unit/system",
+                "ldadd": [
+                    "libcasm_global.la",
+                    "$(BOOST_REGEX_LIB)",
+                    "$(BOOST_SYSTEM_LIB)",
+                    "$(BOOST_FILESYSTEM_LIB)",
+                    "$(BOOST_PROGRAM_OPTIONS_LIB)",
+                    "$(BOOST_CHRONO_LIB)"
+                ],
+            }
+        ]
+
     Returns
     -------
     string
@@ -541,23 +565,9 @@ def make_aggregated_unit_test():
     value += make_libcasmtesting()
     value += horizontal_divide()
 
-    test_root = "tests/unit"
-    test_group = [
-        name for name in os.listdir(test_root)
-        if name not in [".deps", ".libs", "test_projects"]
-    ]
-    test_group.sort()
-
-    test_directories = [
-        name
-        for name in [os.path.join(test_root, group) for group in test_group]
-        if os.path.isdir(name)
-    ]
-    test_directories.sort()
-
-    for d in test_directories:
-        print("Create Makefile segment for unit test {}".format(d))
-        value += make_unit_test(d)
+    for test in test_config:
+        print("Create Makefile segment for unit test {}".format(test["directory"]))
+        value += make_unit_test(test["directory"], test["ldadd"])
         value += horizontal_divide()
 
     return value
@@ -831,15 +841,42 @@ def _exit_on_bad_run_directory():
 
 
 def main():
-    # chunk = make_ccasm()
-    # target = os.path.join("apps", "ccasm", "Makemodule.am")
-    # string_to_file(chunk, target)
 
-    # chunk = make_casm_complete()
-    # target = os.path.join("apps", "completer", "Makemodule.am")
-    # string_to_file(chunk, target)
+    # "ldadd": [
+    #     "libcasm_global.la",
+    #     "$(BOOST_REGEX_LIB)",
+    #     "$(BOOST_SYSTEM_LIB)",
+    #     "$(BOOST_FILESYSTEM_LIB)",
+    #     "$(BOOST_PROGRAM_OPTIONS_LIB)",
+    #     "$(BOOST_CHRONO_LIB)"
+    # ],
 
-    chunk = make_aggregated_unit_test()
+    chunk = make_aggregated_unit_test([
+        {
+            "directory": "tests/unit/casm_io",
+            "ldadd": [
+                "libcasm_global.la"
+            ],
+        },
+        {
+            "directory": "tests/unit/container",
+            "ldadd": [
+                "libcasm_global.la"
+            ],
+        },
+        {
+            "directory": "tests/unit/misc",
+            "ldadd": [
+                "libcasm_global.la"
+            ],
+        },
+        {
+            "directory": "tests/unit/system",
+            "ldadd": [
+                "libcasm_global.la"
+            ],
+        }
+    ])
     target = os.path.join("tests", "unit", "Makemodule.am")
     string_to_file(chunk, target)
 
