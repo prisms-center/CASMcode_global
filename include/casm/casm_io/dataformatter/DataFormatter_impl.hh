@@ -1,7 +1,5 @@
 #ifndef CASM_DataFormatter_impl
 #define CASM_DataFormatter_impl
-#include <boost/lexical_cast.hpp>
-#include <boost/tokenizer.hpp>
 
 #include "casm/casm_io/dataformatter/DataFormatter.hh"
 #include "casm/casm_io/dataformatter/DataFormatterTools.hh"

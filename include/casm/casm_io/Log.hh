@@ -1,8 +1,9 @@
 #ifndef CASM_Log
 #define CASM_Log
 
-#include <boost/chrono.hpp>
+#include <chrono>
 #include <iostream>
+#include <sstream>
 #include <vector>
 
 #include "casm/misc/cloneable_ptr.hh"
@@ -351,9 +352,9 @@ class Log {
   int m_paragraph_width;
   JustificationType m_justification;
 
-  boost::chrono::steady_clock::time_point m_start_time;
+  std::chrono::steady_clock::time_point m_start_time;
 
-  boost::chrono::steady_clock::time_point m_lap_start_time;
+  std::chrono::steady_clock::time_point m_lap_start_time;
 
   std::ostream *m_ostream;
 };

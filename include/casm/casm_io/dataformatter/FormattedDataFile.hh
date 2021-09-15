@@ -1,12 +1,13 @@
 #ifndef CASM_FormattedDataFile
 #define CASM_FormattedDataFile
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <iostream>
 
 #include "casm/casm_io/dataformatter/DataFormatterDecl.hh"
 #include "casm/casm_io/json/jsonParser.hh"
 #include "casm/global/definitions.hh"
+#include "casm/global/filesystem.hh"
 
 namespace CASM {
 

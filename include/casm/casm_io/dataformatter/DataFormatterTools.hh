@@ -1,14 +1,14 @@
 #ifndef CASM_DataFormatterTools
 #define CASM_DataFormatterTools
-#include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
 #include <iterator>
 #include <numeric>
+#include <regex>
 
 #include "casm/casm_io/container/json_io.hh"
 #include "casm/casm_io/dataformatter/DataFormatter.hh"
 #include "casm/container/ContainerTraits.hh"
 #include "casm/misc/CASM_TMP.hh"
+#include "casm/misc/algorithm.hh"
 
 namespace CASM {
 
@@ -294,8 +294,8 @@ DataFormatterOperator<bool, std::string, DataObject> format_operator_re() {
           throw std::runtime_error(
               "Operator re('input_string','regex_pattern') must receive "
               "exactly 2 values!");
-        boost::regex e(boost::trim_copy_if(vec[1], boost::is_any_of(" '")));
-        return boost::regex_match(vec[0], e);
+        std::regex e(trim_copy_if(vec[1], is_any_of(" '")));
+        return std::regex_match(vec[0], e);
       });
 }
 
@@ -317,8 +317,8 @@ DataFormatterOperator<bool, std::string, DataObject> format_operator_rs() {
           throw std::runtime_error(
               "Operator re('input_string','regex_pattern') must receive "
               "exactly 2 values!");
-        boost::regex e(boost::trim_copy_if(vec[1], boost::is_any_of(" '")));
-        return boost::regex_search(vec[0], e);
+        std::regex e(trim_copy_if(vec[1], is_any_of(" '")));
+        return std::regex_search(vec[0], e);
       });
 }
 

@@ -1,9 +1,6 @@
 #include "casm/casm_io/Log.hh"
-
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
-
 #include "casm/external/MersenneTwister/MersenneTwister.h"
+#include "casm/misc/algorithm.hh"
 
 namespace CASM {
 
@@ -32,22 +29,22 @@ Log::Log(std::ostream &_ostream, int _verbosity, bool _show_clock,
   begin_section();
 }
 
-void Log::restart_clock() { m_start_time = boost::chrono::steady_clock::now(); }
+void Log::restart_clock() { m_start_time = std::chrono::steady_clock::now(); }
 
 void Log::show_clock() { m_show_clock = true; }
 
 void Log::hide_clock() { m_show_clock = false; }
 
 double Log::time_s() const {
-  using namespace boost::chrono;
+  using namespace std::chrono;
   auto curr_time = steady_clock::now();
   return duration_cast<duration<double> >(curr_time - m_start_time).count();
 }
 
-void Log::begin_lap() { m_lap_start_time = boost::chrono::steady_clock::now(); }
+void Log::begin_lap() { m_lap_start_time = std::chrono::steady_clock::now(); }
 
 double Log::lap_time() const {
-  using namespace boost::chrono;
+  using namespace std::chrono;
   auto curr_time = steady_clock::now();
   return duration_cast<duration<double> >(curr_time - m_lap_start_time).count();
 }
@@ -166,8 +163,9 @@ void Log::_print_full_justified_line(std::vector<std::string> &line,
 
 /// \brief Print indented paragraph with wrapping at Log::width()
 Log &Log::paragraph(std::string text) {
-  std::vector<std::string> words;
-  boost::split(words, text, boost::is_any_of(" "), boost::token_compress_on);
+  char_separator sep(" ");
+  tokenizer tok(text, sep);
+  std::vector<std::string> words(tok.begin(), tok.end());
 
   // 'curr_width' includes indent and words, but not spaces between them
   int curr_width = indent_str().size();

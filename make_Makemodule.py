@@ -369,29 +369,6 @@ def purge_git_related_files(file_list):
     return [f for f in file_list if os.path.basename(f) not in ignorable]
 
 
-def all_boost_LDADD_flags():
-    """Returns list of all the autotools boost library linker flags
-    that should be added to the LDADD directive, including system,
-    filesystem, program_options, regex, and chrono.
-
-    TODO: Linking to all of these is completely unnecessary, you should
-    only be linking to the ones you actually need! This function is bad
-    and stupid, and you should refactor things so that it doesn't exist anymore.
-
-    Returns
-    -------
-    list of str
-
-    """
-    def flagify(lib):
-        return "$(BOOST_{}_LIB)".format(lib)
-
-    libs = ["REGEX", "SYSTEM", "FILESYSTEM", "PROGRAM_OPTIONS", "CHRONO"]
-    # libs.sort()
-
-    return [flagify(lib) for lib in libs]
-
-
 def make_libgtest():
     """Creates the Makefile segment for the gtest library used
     for unit testing
@@ -451,7 +428,6 @@ def make_unit_test(unit_test_directory, ldadd=[]):
     # in a separate subdirectory
     source_files = [f for f in only_makeable_files if f.endswith("_test.cpp")
                     ] + ["tests/unit/gtest_main_run_all.cpp"]
-    # ldadd = ["libcasm.la", "libcasmtesting.la"] + all_boost_LDADD_flags()
     ldadd.append("libcasmtesting.la")
 
     value = basic_maker_string("TESTS", "+=", [test_name])
@@ -540,12 +516,7 @@ def make_aggregated_unit_test(test_config):
             {
                 "directory": "tests/unit/system",
                 "ldadd": [
-                    "libcasm_global.la",
-                    "$(BOOST_REGEX_LIB)",
-                    "$(BOOST_SYSTEM_LIB)",
-                    "$(BOOST_FILESYSTEM_LIB)",
-                    "$(BOOST_PROGRAM_OPTIONS_LIB)",
-                    "$(BOOST_CHRONO_LIB)"
+                    "libcasm_global.la"
                 ],
             }
         ]
@@ -699,7 +670,7 @@ def make_ccasm():
         "ccasm",
         "bin",
         SOURCES=["apps/ccasm/ccasm.cpp"],
-        LDADD=["libcasm.la"] + all_boost_LDADD_flags(),
+        LDADD=["libcasm.la"],
     )
     return value
 
@@ -725,7 +696,7 @@ def make_casm_complete():
         "casm-complete",
         "bin",
         SOURCES=["apps/completer/complete.cpp"],
-        LDADD=["libcasm.la"] + all_boost_LDADD_flags(),
+        LDADD=["libcasm.la"],
     )
 
     value += "\n\nendif"
@@ -784,8 +755,8 @@ def make_libcasm(name, additional_sources):
         "libcasm_" + name,
         "src/casm",
         additional_sources,
-        LIBADD=all_boost_LDADD_flags(),
-        LDFLAGS=["-avoid-version", "$(BOOST_LDFLAGS)"],
+        LIBADD=[],
+        LDFLAGS=["-avoid-version"],
     )
     # Uncomment if you want to forcefully recompile every time to ensure the version gets baked in
     # value += "\nsrc/casm/version/autoversion.lo: .FORCE"
@@ -841,15 +812,6 @@ def _exit_on_bad_run_directory():
 
 
 def main():
-
-    # "ldadd": [
-    #     "libcasm_global.la",
-    #     "$(BOOST_REGEX_LIB)",
-    #     "$(BOOST_SYSTEM_LIB)",
-    #     "$(BOOST_FILESYSTEM_LIB)",
-    #     "$(BOOST_PROGRAM_OPTIONS_LIB)",
-    #     "$(BOOST_CHRONO_LIB)"
-    # ],
 
     chunk = make_aggregated_unit_test([
         {

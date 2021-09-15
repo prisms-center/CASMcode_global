@@ -1,10 +1,10 @@
-#include "casm/system/RuntimeLibrary.hh"
-
-#include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <vector>
 
+#include "casm/global/filesystem.hh"
+#include "casm/misc/algorithm.hh"
 #include "casm/system/Popen.hh"
+#include "casm/system/RuntimeLibrary.hh"
 
 namespace CASM {
 
@@ -166,44 +166,11 @@ std::vector<std::string> _soflags_env() {
   return std::vector<std::string>{"CASM_SOFLAGS"};
 }
 
-// std::vector<std::string> _casm_env() {
-//   return std::vector<std::string> {
-//     "CASM_PREFIX"
-//   };
-// }
-//
-// std::vector<std::string> _boost_env() {
-//   return std::vector<std::string> {
-//     "CASM_BOOST_PREFIX"
-//   };
-// }
-
-/// \brief Some function of environment variables
-std::pair<std::string, std::string> _use_env(std::vector<std::string> var,
-                                             std::string _default = "") {
-  for (const auto &v : var) {
-    char *_env = std::getenv(v.c_str());
-    if (_env != nullptr) {
-      return std::make_pair(std::string(_env), v);
-    }
-  }
-  return std::make_pair(_default, "default");
-}
-
-fs::path find_executable(std::string name) {
-  char *_env = std::getenv("PATH");
-  std::vector<std::string> splt;
-  boost::split(splt, _env, boost::is_any_of(":"), boost::token_compress_on);
-
-  for (const auto &p : splt) {
-    fs::path test{fs::path(p) / name};
-    if (fs::exists(test)) {
-      return test;
-    }
-  }
-  return fs::path();
-}
-
+/// \brief Search for an "include" directory by searching PATH for
+/// `executable_name`
+///
+/// Notes:
+/// - Assumes PATH can be split using `:`
 fs::path find_include(std::string executable_name, std::string include_name) {
   fs::path loc = find_executable(executable_name);
   if (loc.empty()) {
@@ -265,27 +232,32 @@ fs::path find_libdir(std::string executable_name, std::string lib_name) {
 ///          "$CXX" if environment variable CXX exists,
 ///          otherwise "g++"
 std::pair<std::string, std::string> RuntimeLibrary::default_cxx() {
-  return _use_env(_cxx_env(), "g++");
+  return use_env(_cxx_env(), "g++");
 }
 
 /// \brief Default c++ compiler options
 ///
 /// \returns "-O3 -Wall -fPIC --std=c++17"
 std::pair<std::string, std::string> RuntimeLibrary::default_cxxflags() {
-  return _use_env(_cxxflags_env(), "-O3 -Wall -fPIC --std=c++17");
+  return use_env(_cxxflags_env(), "-O3 -Wall -fPIC --std=c++17");
 }
 
 /// \brief Default c++ shared library options
 ///
-/// \returns "-shared -lboost_system"
+/// \returns "-shared"
 std::pair<std::string, std::string> RuntimeLibrary::default_soflags() {
-  return _use_env(_soflags_env(), "-shared -lboost_system");
+  return use_env(_soflags_env(), "-shared");
 }
 
 /// \brief Return include path option for CASM
 ///
-/// \returns In order of preference: $CASM_INCLUDEDIR, or
-///          $CASM_PREFIX/include, or "/usr/local/include"
+/// \returns In order of preference, one of:
+///     - {$CASM_INCLUDEDIR, "CASM_INCLUDEDIR"}, or
+///     - {$CASM_PREFIX/include, "CASM_PREFIX"} or
+///     - {$prefix/include, "relpath"}, where using $prefix is found by
+///       searching PATH for ccasm, or
+///     - {"/not/found", "notfound"}, if previous all fail
+///
 std::pair<fs::path, std::string> RuntimeLibrary::default_casm_includedir() {
   char *_env;
 
@@ -313,12 +285,18 @@ std::pair<fs::path, std::string> RuntimeLibrary::default_casm_includedir() {
 
 /// \brief Return lib path option for CASM
 ///
-/// \returns In order of preference: $CASM_LIBDIR, or
-///          $CASM_PREFIX/lib, or "/usr/local/lib"
+/// \returns In order of preference, one of:
+///     - {$CASM_LIBDIR, "CASM_LIBDIR"}, or
+///     - {$CASM_PREFIX/lib, "CASM_PREFIX"} or
+///     - {$prefix/$librelpath, "relpath"}, where using $prefix is found by
+///       searching PATH for ccasm and $librelpath is found by searching for
+///       libcasm_global is standard locations relative to $prefix, or
+///     - {"/not/found", "notfound"}, if previous all fail
+///
 std::pair<fs::path, std::string> RuntimeLibrary::default_casm_libdir() {
   char *_env;
 
-  // if CASM_INCLUDEDIR exists
+  // if CASM_LIBDIR exists
   _env = std::getenv("CASM_LIBDIR");
   if (_env != nullptr) {
     return std::make_pair(std::string(_env), "CASM_LIBDIR");
@@ -331,7 +309,7 @@ std::pair<fs::path, std::string> RuntimeLibrary::default_casm_libdir() {
   }
 
   // relpath from ccasm
-  fs::path _default = find_libdir("ccasm", "libcasm");
+  fs::path _default = find_libdir("ccasm", "libcasm_global");
   if (!_default.empty()) {
     return std::make_pair(_default, "relpath");
   }
@@ -340,64 +318,52 @@ std::pair<fs::path, std::string> RuntimeLibrary::default_casm_libdir() {
   return std::make_pair(fs::path("/not/found"), "notfound");
 }
 
-/// \brief Return include path option for boost
+/// \brief Get a value from the environment
 ///
-/// \returns In order of preference: $CASM_BOOST_INCLUDEDIR, or
-///          $CASM_BOOST_PREFIX/include, or "/usr/local/include"
-std::pair<fs::path, std::string> RuntimeLibrary::default_boost_includedir() {
-  char *_env;
-
-  // if CASM_BOOST_INCLUDEDIR exists
-  _env = std::getenv("CASM_BOOST_INCLUDEDIR");
-  if (_env != nullptr) {
-    return std::make_pair(std::string(_env), "CASM_BOOST_INCLUDEDIR");
-  }
-
-  // if CASM_BOOST_PREFIX exists
-  _env = std::getenv("CASM_BOOST_PREFIX");
-  if (_env != nullptr) {
-    return std::make_pair(fs::path(_env) / "include", "CASM_BOOST_PREFIX");
-  }
-
-  // relpath from ccasm
-  fs::path _default = find_includedir("ccasm", "boost");
-  if (!_default.empty()) {
-    return std::make_pair(_default, "relpath");
-  }
-
-  // else
-  return std::make_pair(fs::path("/not/found"), "notfound");
-}
-
-/// \brief Return lib path option for boost
+/// \param var List of environment variables to check, in order of priority
+/// \param _default Default value to use if no element of `var` was found
 ///
-/// \returns In order of preference: $CASM_BOOST_LIBDIR, or
-///          $CASM_BOOST_PREFIX/lib, or "/usr/local/lib"
-std::pair<fs::path, std::string> RuntimeLibrary::default_boost_libdir() {
-  char *_env;
-
-  // if CASM_BOOST_INCLUDEDIR exists
-  _env = std::getenv("CASM_BOOST_LIBDIR");
-  if (_env != nullptr) {
-    return std::make_pair(std::string(_env), "CASM_BOOST_LIBDIR");
+/// \returns Pair of {value,source}, where `value` is the value obtained, and
+/// `source` is the environment value found, else "default" if no element of
+/// `var` was found
+///
+std::pair<std::string, std::string> use_env(std::vector<std::string> var,
+                                            std::string _default) {
+  for (const auto &v : var) {
+    char *_env = std::getenv(v.c_str());
+    if (_env != nullptr) {
+      return std::make_pair(std::string(_env), v);
+    }
   }
-
-  // if CASM_BOOST_PREFIX exists
-  _env = std::getenv("CASM_BOOST_PREFIX");
-  if (_env != nullptr) {
-    return std::make_pair(fs::path(_env) / "lib", "CASM_BOOST_PREFIX");
-  }
-
-  // relpath from ccasm
-  fs::path _default = find_libdir("ccasm", "libboost_system");
-  if (!_default.empty()) {
-    return std::make_pair(_default, "relpath");
-  }
-
-  // else
-  return std::make_pair(fs::path("/not/found"), "notfound");
+  return std::make_pair(_default, "default");
 }
 
+/// \brief Search PATH for `name`
+///
+/// Notes:
+/// - Assumes PATH can be split using `:`
+fs::path find_executable(std::string name) {
+  char *_env = std::getenv("PATH");
+
+  char_separator sep(":");
+  tokenizer tok(_env, sep);
+  std::vector<std::string> splt(tok.begin(), tok.end());
+
+  for (const auto &p : splt) {
+    fs::path test{fs::path(p) / name};
+    if (fs::exists(test)) {
+      return test;
+    }
+  }
+  return fs::path();
+}
+
+/// Return an include path string
+///
+/// Equivalent to:
+/// \code
+/// return dir.empty() ? "" : "-I" + dir.string();
+/// \endcode
 std::string include_path(const fs::path &dir) {
   if (!dir.empty()) {
     return "-I" + dir.string();
@@ -405,6 +371,12 @@ std::string include_path(const fs::path &dir) {
   return "";
 };
 
+/// Return a linking path string
+///
+/// Equivalent to:
+/// \code
+/// return dir.empty() ? "" : "-L" + dir.string();
+/// \endcode
 std::string link_path(const fs::path &dir) {
   if (!dir.empty()) {
     return "-L" + dir.string();

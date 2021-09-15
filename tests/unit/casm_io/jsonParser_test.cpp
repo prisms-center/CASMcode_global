@@ -1,10 +1,7 @@
-#include "gtest/gtest.h"
-
-/// What is being tested:
+#include <filesystem>
 #include "casm/casm_io/json/jsonParser.hh"
-
-/// What is being used to test it:
-#include <boost/filesystem.hpp>
+#include "casm/global/filesystem.hh"
+#include "gtest/gtest.h"
 
 using namespace CASM;
 

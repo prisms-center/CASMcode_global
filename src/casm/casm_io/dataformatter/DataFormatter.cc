@@ -1,12 +1,11 @@
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/tokenizer.hpp>
 #include <casm/casm_io/container/stream_io.hh>
 #include <iostream>
 #include <string>
 #include <vector>
 
+#include "casm/casm_io/dataformatter/DataFormatter_impl.hh"
 #include "casm/global/definitions.hh"
+#include "casm/misc/algorithm.hh"
 
 namespace CASM {
 //****************************************************************************************
@@ -14,8 +13,7 @@ namespace CASM {
 std::pair<std::vector<long>, std::vector<long> > index_expression_to_bounds(
     const std::string &_expr) {
   // std::cout << "Parsing index expression: " << _expr << "\n";
-  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-  boost::char_separator<char> sep1(","), sep2(" \t", ":");
+  char_separator sep1(","), sep2(" \t", ":");
   tokenizer tok1(_expr, sep1);
   std::vector<std::string> split_expr(tok1.begin(), tok1.end());
   std::vector<long> ind_vec_begin(split_expr.size());
@@ -27,11 +25,11 @@ std::pair<std::vector<long>, std::vector<long> > index_expression_to_bounds(
       if (ind_expr[0][0] == ':')
         ind_vec_begin[i] = -1;
       else
-        ind_vec_begin[i] = boost::lexical_cast<long>(ind_expr[0]);
+        ind_vec_begin[i] = std::stol(ind_expr[0]);
       ind_vec_end[i] = ind_vec_begin[i];
     } else if (ind_expr.size() == 3) {
-      ind_vec_begin[i] = boost::lexical_cast<long>(ind_expr[0]);
-      ind_vec_end[i] = boost::lexical_cast<long>(ind_expr[2]);
+      ind_vec_begin[i] = std::stol(ind_expr[0]);
+      ind_vec_end[i] = std::stol(ind_expr[2]);
     } else
       throw std::runtime_error(
           std::string(
@@ -66,7 +64,7 @@ void split_formatter_expression(const std::string &input_expr,
   std::string::const_iterator it(input_expr.cbegin()),
       it_end(input_expr.cend()), t_it1, t_it2;
   while (it != it_end) {
-    while (it != it_end && (isspace(*it) || boost::is_any_of(",#")(*it))) ++it;
+    while (it != it_end && (isspace(*it) || is_any_of(",#")(*it))) ++it;
     if (it == it_end) break;
     // Identified a formatter tag, save starting iterator
     t_it1 = it;

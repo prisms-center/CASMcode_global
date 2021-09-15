@@ -1,5 +1,4 @@
 #include "casm/casm_io/Log.hh"
-
 #include "gtest/gtest.h"
 
 using namespace CASM;

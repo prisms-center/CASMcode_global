@@ -530,7 +530,7 @@ std::pair<Eigen::MatrixXi, Eigen::MatrixXi> hermite_normal_form(
         "  M must be square.");
   }
 
-  if (boost::math::iround(M.cast<double>().determinant()) == 0) {
+  if (std::lround(M.cast<double>().determinant()) == 0) {
     throw std::runtime_error(
         std::string(
             "Error in hermite_normal_form(const Eigen::MatrixXi &M)\n") +

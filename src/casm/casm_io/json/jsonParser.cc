@@ -1,8 +1,7 @@
+#include <cstdint>
+#include <filesystem>
+#include <fstream>
 #include "casm/casm_io/json/jsonParser.hh"
-
-#include <boost/filesystem/fstream.hpp>
-#include <boost/filesystem/path.hpp>
-
 #include "casm/misc/CASM_math.hh"
 
 namespace CASM {
@@ -20,17 +19,17 @@ jsonParser &to_json(int value, jsonParser &json) {
 }
 
 jsonParser &to_json(unsigned int value, jsonParser &json) {
-  *((json_spirit::mValue *)&json) = json_spirit::mValue(boost::uint64_t(value));
+  *((json_spirit::mValue *)&json) = json_spirit::mValue(uint64_t(value));
   return json;
 }
 
 jsonParser &to_json(const long int value, jsonParser &json) {
-  *((json_spirit::mValue *)&json) = json_spirit::mValue(boost::int64_t(value));
+  *((json_spirit::mValue *)&json) = json_spirit::mValue(int64_t(value));
   return json;
 }
 
 jsonParser &to_json(const unsigned long int value, jsonParser &json) {
-  *((json_spirit::mValue *)&json) = json_spirit::mValue(boost::uint64_t(value));
+  *((json_spirit::mValue *)&json) = json_spirit::mValue(uint64_t(value));
   return json;
 }
 
@@ -170,7 +169,7 @@ bool jsonParser::read(std::istream &stream) {
 }
 
 bool jsonParser::read(const fs::path &file_path) {
-  fs::ifstream stream(file_path);
+  std::ifstream stream(file_path);
   return read(stream);
 }
 
@@ -204,7 +203,7 @@ void jsonParser::write(const std::string &file_name, unsigned int indent,
 /// Write json to file
 void jsonParser::write(const fs::path &file_path, unsigned int indent,
                        unsigned int prec) const {
-  fs::ofstream file(file_path);
+  std::ofstream file(file_path);
   print(file, indent, prec);
   file.close();
   return;

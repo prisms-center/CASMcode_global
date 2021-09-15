@@ -1,7 +1,7 @@
 #ifndef CASM_InputParser
 #define CASM_InputParser
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <set>
@@ -9,6 +9,7 @@
 
 #include "casm/casm_io/json/jsonParser.hh"
 #include "casm/global/definitions.hh"
+#include "casm/global/filesystem.hh"
 #include "casm/misc/Validator.hh"
 
 namespace CASM {

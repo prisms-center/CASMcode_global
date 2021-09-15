@@ -1,14 +1,14 @@
 #ifndef CASM_SafeOfstream
 #define CASM_SafeOfstream
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <fstream>
 #include <string>
 #include <vector>
 
 namespace CASM {
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 /// \brief Write to a temporary file to ensure a good write, then rename
 ///

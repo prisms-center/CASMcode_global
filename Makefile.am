@@ -23,17 +23,13 @@ AM_CXXFLAGS = -DTXT_VERSION='"$(TXT_VERSION)"'\
 			  -DEIGEN_DEFAULT_DENSE_INDEX_TYPE=long\
 			  -DGZSTREAM_NAMESPACE=gz
 
-AM_CPPFLAGS = -I$(srcdir)/include/casm/external/qhull/libqhull_r/\
-			  -I$(srcdir)/include/casm/external/gzstream\
-			  -I$(srcdir)/include/casm/external/eigen\
+AM_CPPFLAGS = -I$(srcdir)/include/casm/external/gzstream\
+			  -I$(srcdir)/include/casm/external/Eigen\
 			  -I$(srcdir)/submodules/googletest/googletest\
 			  -I$(srcdir)/submodules/googletest/googletest/include\
-			  -I$(srcdir)/include\
-			  -I$(srcdir)/include/casm/external/gzstream\
-			  -I$(srcdir)/include/casm/external/qhull/libqhullcpp
-			  $(BOOST_CPPFLAGS)
+			  -I$(srcdir)/include
 
-AM_LDFLAGS = $(BOOST_LDFLAGS)
+AM_LDFLAGS =
 
 BUILT_SOURCES=
 
@@ -67,9 +63,6 @@ test:
 	echo "AM_CXXFLAGS: $(AM_CXXFLAGS)"
 	echo "AM_CPPFLAGS: $(AM_CPPFLAGS)"
 	echo "casm_LDFLAGS: $(casm_LDFLAGS)"
-	echo "BOOST_LDFLAGS: $(BOOST_LDFLAGS)"
-	echo "BOOST_CXXFLAGS: $(BOOST_CXXFLAGS)"
-	echo "BOOST_CPPFLAGS: $(BOOST_CPPFLAGS)"
 	echo "includedir: $(includedir)"
 	echo "TXT_VERSION: $(TXT_VERSION)"
 	echo "bin_PROGRAMS: $(bin_PROGRAMS)"

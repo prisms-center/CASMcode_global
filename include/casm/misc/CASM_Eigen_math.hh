@@ -1,7 +1,6 @@
 #ifndef CASM_Eigen_math
 #define CASM_Eigen_math
 
-#include <boost/math/special_functions/round.hpp>
 #include <cassert>
 #include <cmath>
 #include <complex>
@@ -33,11 +32,11 @@ inline bool _compare(std::complex<double> const &a,
 
 // Lambda functions to replace std::ptr_fun, which is deprecated
 template <typename T>
-auto round_l = [](T val) { return boost::math::round<T>(val); };
+auto round_l = [](T val) { return std::round(val); };
 template <typename T>
-auto iround_l = [](T val) { return boost::math::iround<T>(val); };
+auto iround_l = [](T val) { return static_cast<int>(std::lround(val)); };
 template <typename T>
-auto lround_l = [](T val) { return boost::math::lround<T>(val); };
+auto lround_l = [](T val) { return std::lround(val); };
 }  // namespace Local
 namespace CASM {
 
@@ -166,7 +165,7 @@ template <typename Derived>
 bool is_integer(const Eigen::MatrixBase<Derived> &M, double tol) {
   for (Index i = 0; i < M.rows(); i++) {
     for (Index j = 0; j < M.cols(); j++) {
-      if (!almost_zero(boost::math::lround(M(i, j)) - M(i, j), tol))
+      if (!almost_zero(std::lround(M(i, j)) - M(i, j), tol))
         return false;
     }
   }
@@ -193,7 +192,7 @@ bool is_diagonal(const Eigen::MatrixBase<Derived> &M, double tol = TOL) {
 ///
 /// \param M Eigen::MatrixXd to be rounded
 ///
-/// For each coefficient, sets \code M(i,j) = boost::math::round(Mdouble(i, j))
+/// For each coefficient, sets \code M(i,j) = std::round(Mdouble(i, j))
 /// \endcode
 ///
 template <typename Derived>
@@ -209,8 +208,9 @@ round(const Eigen::MatrixBase<Derived> &val) {
 ///
 /// \param M Eigen::MatrixXd to be rounded to integer
 ///
-/// For each coefficient, sets \code Mint(i,j) = boost::math::iround(Mdouble(i,
-/// j)) \endcode
+/// For each coefficient, sets \code Mint(i,j) =
+///     static_cast<int>(std::lround(Mdouble(i,j)))
+/// \endcode
 ///
 template <typename Derived>
 Eigen::CwiseUnaryOp<decltype(Local::iround_l<typename Derived::Scalar>),
@@ -542,7 +542,7 @@ namespace Eigen {
 ///
 /// \param M Eigen::MatrixXd to be rounded
 ///
-/// For each coefficient, sets \code M(i,j) = boost::math::floor(Mdouble(i, j))
+/// For each coefficient, sets \code M(i,j) = std::floor(Mdouble(i, j))
 /// \endcode
 ///
 /* namespace Local { */
@@ -629,7 +629,7 @@ scale_to_int(const Eigen::MatrixBase<Derived> &val, double _tol = CASM::TOL) {
     tdubs = double(factor) * dubs;
     for (i = 0; i < dubs.rows(); i++) {
       for (j = 0; j < dubs.cols(); j++) {
-        if (!CASM::almost_zero(boost::math::round(tdubs(i, j)) - tdubs(i, j),
+        if (!CASM::almost_zero(std::round(tdubs(i, j)) - tdubs(i, j),
                                _tol))
           break;
       }
@@ -641,7 +641,7 @@ scale_to_int(const Eigen::MatrixBase<Derived> &val, double _tol = CASM::TOL) {
   if (within_tol) {
     for (i = 0; i < dubs.rows(); i++) {
       for (j = 0; j < dubs.cols(); j++) {
-        ints(i, j) = boost::math::round(tdubs(i, j));
+        ints(i, j) = std::round(tdubs(i, j));
       }
     }
   }

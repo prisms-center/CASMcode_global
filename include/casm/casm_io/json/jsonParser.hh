@@ -6,17 +6,11 @@
 
 #include "casm/external/json_spirit/json_spirit_reader_template.h"
 #include "casm/external/json_spirit/json_spirit_writer_template.h"
+#include "casm/global/filesystem.hh"
 #include "casm/misc/CASM_TMP.hh"
 
-namespace boost {
-namespace filesystem {
-class path;
-}
-}  // namespace boost
 
 namespace CASM {
-
-namespace fs = boost::filesystem;
 
 template <bool IsConst>
 class jsonParserIterator;
@@ -128,7 +122,7 @@ class jsonParser : public json_spirit::mValue {
   bool read(std::istream &stream);
 
   /// Reads json from a path
-  bool read(const boost::filesystem::path &mypath);
+  bool read(const fs::path &mypath);
 
   /// Print json to stream
   void print(std::ostream &stream, unsigned int indent = 2,
@@ -139,7 +133,7 @@ class jsonParser : public json_spirit::mValue {
              unsigned int prec = 12) const;
 
   /// Write json to file
-  void write(const boost::filesystem::path &mypath, unsigned int indent = 2,
+  void write(const fs::path &mypath, unsigned int indent = 2,
              unsigned int prec = 12) const;
 
   // ---- Value level printing options: ---------------------
@@ -597,11 +591,11 @@ void make_from_json(std::unique_ptr<T> &ptr, const jsonParser &json,
 }
 
 /// Return the location at which jsonParser 'A' != 'B' as a
-/// boost::filesystem::path
+/// std::filesystem::path
 fs::path find_diff(const jsonParser &A, const jsonParser &B);
 
 /// Return the location at which jsonParser !A.almost_equal(B, tol) as a
-/// boost::filesystem::path
+/// std::filesystem::path
 fs::path find_diff(const jsonParser &A, const jsonParser &B, double tol);
 
 /// jsonParser bidirectional Iterator class

@@ -1,10 +1,9 @@
 #ifndef CASM_DataFormatterTools_impl
 #define CASM_DataFormatterTools_impl
 
-#include <algorithm>
-
 #include "casm/casm_io/dataformatter/DataFormatterTools.hh"
 #include "casm/casm_io/dataformatter/DataFormatter_impl.hh"
+#include "casm/misc/algorithm.hh"
 
 namespace CASM {
 
@@ -26,8 +25,8 @@ bool DataFormatterOperator<ValueType, ArgType, DataObject>::parse_args(
                    tolower);
 
     char ch = ttag[0];
-    if (boost::is_any_of("-+.0123456789")(ch)) {  // tag is a constant number
-      if (std::any_of(ttag.cbegin(), ttag.cend(), boost::is_any_of(".e"))) {
+    if (is_any_of("-+.0123456789")(ch)) {  // tag is a constant number
+      if (std::any_of(ttag.cbegin(), ttag.cend(), is_any_of(".e"))) {
         double val;
         try {
           val = std::stod(ttag);

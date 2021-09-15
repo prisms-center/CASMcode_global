@@ -1,13 +1,7 @@
-#include "gtest/gtest.h"
-
-/// Dependencies
-#include "casm/container/Array.hh"
-
-/// What is being tested:
-#include "casm/container/Counter.hh"
-
-/// What is being used to test it:
 #include <vector>
+#include "casm/container/Array.hh"
+#include "casm/container/Counter.hh"
+#include "gtest/gtest.h"
 
 using namespace CASM;
 

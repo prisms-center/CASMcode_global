@@ -10,6 +10,7 @@
 #include <string>
 
 #include "casm/global/definitions.hh"
+#include "casm/global/filesystem.hh"
 
 namespace CASM {
 
@@ -86,12 +87,6 @@ class RuntimeLibrary {
   /// \brief Return default libdir for CASM
   static std::pair<fs::path, std::string> default_casm_libdir();
 
-  /// \brief Return default includedir for boost
-  static std::pair<fs::path, std::string> default_boost_includedir();
-
-  /// \brief Return default libdir for boost
-  static std::pair<fs::path, std::string> default_boost_libdir();
-
  private:
   /// \brief Compile a shared library
   void _compile();
@@ -109,8 +104,17 @@ class RuntimeLibrary {
   void *m_handle;
 };
 
+/// \brief Get a value from the environment
+std::pair<std::string, std::string> use_env(std::vector<std::string> var,
+                                            std::string _default = "");
+
+/// \brief Search PATH for `name`
+fs::path find_executable(std::string name);
+
+/// Return an include path string
 std::string include_path(const fs::path &dir);
 
+/// Return a linking path string
 std::string link_path(const fs::path &dir);
 
 }  // namespace CASM

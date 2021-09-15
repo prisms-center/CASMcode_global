@@ -1,7 +1,7 @@
 #ifndef CASM_FormattedDataFile_impl
 #define CASM_FormattedDataFile_impl
 
-#include <boost/filesystem/fstream.hpp>
+#include <fstream>
 
 #include "casm/casm_io/dataformatter/FormattedDataFile.hh"
 #include "casm/external/gzstream/gzstream.h"

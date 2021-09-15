@@ -1,17 +1,11 @@
-#include "gtest/gtest.h"
-
-/// What is being tested:
 #include "casm/casm_io/enum/json_io.hh"
 #include "casm/casm_io/enum/stream_io.hh"
+#include "casm/casm_io/json/jsonParser.hh"
 #include "casm/global/enum.hh"
 #include "casm/global/enum/io_traits.hh"
 #include "casm/global/enum/json_io.hh"
 #include "casm/global/enum/stream_io.hh"
-
-/// What is being used to test it:
-#include <boost/filesystem.hpp>
-
-#include "casm/casm_io/json/jsonParser.hh"
+#include "gtest/gtest.h"
 
 using namespace CASM;
 

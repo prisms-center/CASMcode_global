@@ -1,7 +1,5 @@
-#include "gtest/gtest.h"
-
-/// What is being tested:
 #include "casm/misc/cloneable_ptr.hh"
+#include "gtest/gtest.h"
 
 class ATest {
  public:
