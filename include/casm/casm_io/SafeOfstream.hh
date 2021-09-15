@@ -25,7 +25,7 @@ namespace fs = std::filesystem;
 /// json.write(file.ofstream());
 ///
 /// // 'close' results in closing "something.json.tmp", checking
-/// fs::ofstream::fail(), and if not failed,
+/// std::ofstream::fail(), and if not failed,
 /// // then removing "something.json", and renaming "something.json.tmp" ->
 /// "something.json" file.close(); \endcode
 class SafeOfstream {
@@ -58,7 +58,7 @@ class SafeOfstream {
   /// json.print(file.ofstream());
   ///
   /// // 'close' results in closing ofstream to "something.json.tmp", checking
-  /// fs::ofstream::fail(),
+  /// std::ofstream::fail(),
   /// // and if not failed then removing "something.json", and renaming
   /// "something.json.tmp" -> "something.json" file.close(); \endcode
   ///
@@ -77,7 +77,7 @@ class SafeOfstream {
   }
 
   /// \brief Access underlying stream
-  fs::ofstream &ofstream() { return m_sout; }
+  std::ofstream &ofstream() { return m_sout; }
 
   /// \brief Closes stream, and if not a failed write, removes "file" and
   /// renames "file.tmp" to "file"
@@ -92,7 +92,7 @@ class SafeOfstream {
  private:
   fs::path m_name;
   fs::path m_tmp_name;
-  fs::ofstream m_sout;
+  std::ofstream m_sout;
 };
 
 }  // namespace CASM
