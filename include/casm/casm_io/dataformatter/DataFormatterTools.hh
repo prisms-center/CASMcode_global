@@ -8,7 +8,7 @@
 #include "casm/casm_io/dataformatter/DataFormatter.hh"
 #include "casm/container/ContainerTraits.hh"
 #include "casm/misc/CASM_TMP.hh"
-#include "casm/misc/algorithm.hh"
+#include "casm/misc/string_algorithm.hh"
 
 namespace CASM {
 

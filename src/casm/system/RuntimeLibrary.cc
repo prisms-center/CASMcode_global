@@ -1,10 +1,11 @@
+#include "casm/system/RuntimeLibrary.hh"
+
 #include <filesystem>
 #include <vector>
 
 #include "casm/global/filesystem.hh"
-#include "casm/misc/algorithm.hh"
+#include "casm/misc/string_algorithm.hh"
 #include "casm/system/Popen.hh"
-#include "casm/system/RuntimeLibrary.hh"
 
 namespace CASM {
 

@@ -1,6 +1,7 @@
 #include "casm/casm_io/Log.hh"
+
 #include "casm/external/MersenneTwister/MersenneTwister.h"
-#include "casm/misc/algorithm.hh"
+#include "casm/misc/string_algorithm.hh"
 
 namespace CASM {
 
