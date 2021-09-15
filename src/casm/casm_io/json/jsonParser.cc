@@ -191,11 +191,6 @@ std::istream &operator>>(std::istream &stream, jsonParser &json) {
 /// Writes json to stream
 void jsonParser::print(std::ostream &stream, unsigned int indent,
                        unsigned int prec) const {
-  // json_spirit::write_stream(
-  //   (json_spirit::mValue &)*this, stream, indent, prec,
-  //   json_spirit::pretty_print | json_spirit::raw_utf8 |
-  //       json_spirit::single_line_arrays);
-
   // TODO: formatting prec, single_line_arrays
   stream << self().dump(indent);
 };

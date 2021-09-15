@@ -142,30 +142,6 @@ class jsonParser : public nlohmann::json {
 
   // ---- Value level printing options: ---------------------
 
-  // /// Force array printing as column
-  // using json_spirit::mValue::set_force_column;
-  //
-  // /// Force array printing as row
-  // using json_spirit::mValue::set_force_row;
-  //
-  // /// Force printing double using scientific notation
-  // using json_spirit::mValue::set_scientific;
-  //
-  // /// Remove trailing zeros for real (double) values
-  // using json_spirit::mValue::set_remove_trailing_zeros;
-  //
-  // /// Do not force array printing as column
-  // using json_spirit::mValue::unset_force_column;
-  //
-  // /// Do not force array printing as row
-  // using json_spirit::mValue::unset_force_row;
-  //
-  // /// Do not force printing double using scientific notation
-  // using json_spirit::mValue::unset_scientific;
-  //
-  // /// Do not remove trailing zeros for real (double) values
-  // using json_spirit::mValue::unset_remove_trailing_zeros;
-
   void set_force_column() const {
     // set_force_column is not yet supported with nlohmann::json
   }
