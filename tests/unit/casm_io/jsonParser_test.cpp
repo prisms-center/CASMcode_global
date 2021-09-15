@@ -1,5 +1,7 @@
-#include <filesystem>
 #include "casm/casm_io/json/jsonParser.hh"
+
+#include <filesystem>
+
 #include "casm/global/filesystem.hh"
 #include "gtest/gtest.h"
 
@@ -45,6 +47,21 @@ TEST(jsonParserTest, Basic) {
   ASSERT_EQ(4.0023, json["number"].get<double>());
 }
 
+TEST(jsonParserTest, Basic2) {
+  jsonParser json;
+  ASSERT_EQ(true, json.is_obj());
+
+  json["something"] = true;
+  ASSERT_EQ(true, json.is_obj());
+  ASSERT_EQ(true, json["something"].is_bool());
+
+  json = 3;
+  ASSERT_EQ(true, json.is_int());
+
+  json = std::string("hello");
+  ASSERT_EQ(true, json.is_string());
+}
+
 template <typename T>
 void test_at(T &json) {
   ASSERT_EQ(json.at("int").template get<int>(), 34);
@@ -75,15 +92,7 @@ TEST(jsonParserTest, ConstAt) {
 
 template <typename T>
 void test_find_at(T &json) {
-  ASSERT_EQ(&json == &*json.find_at(fs::path()), true);
-  ASSERT_EQ(&json == &*json.find_at(""), true);
-
-  {
-    auto it = json.find_at(fs::path());
-    ASSERT_EQ(json.end() == it, false);
-    it++;
-    ASSERT_EQ(json.end() == it, true);
-  }
+  ASSERT_THROW(json.find_at(fs::path()), std::exception);
 
   ASSERT_EQ(json.find_at("int")->template get<int>(), 34);
   ASSERT_EQ(json.find_at("mistake") == json.end(), true);
@@ -111,7 +120,7 @@ TEST(jsonParserTest, Get) {
   const jsonParser json = jsonParser::parse(json_str);
 
   ASSERT_EQ(json["int"].get<int>(), 34);
-  ASSERT_THROW(json["int"].get<std::string>(), std::runtime_error);
+  ASSERT_THROW(json["int"].get<std::string>(), std::exception);
 }
 
 TEST(jsonParserTest, ArrayExtraTrailingComma) {
@@ -138,8 +147,7 @@ TEST(jsonParserTest, ArrayExtraTrailingComma) {
 ]
 })";
 
-  ASSERT_THROW(jsonParser::parse(json_extra_trailing_comma),
-               std::runtime_error);
+  ASSERT_THROW(jsonParser::parse(json_extra_trailing_comma), std::exception);
 }
 
 TEST(jsonParserTest, ArrayMissingComma) {
@@ -166,7 +174,7 @@ TEST(jsonParserTest, ArrayMissingComma) {
 ]
 })";
 
-  ASSERT_THROW(jsonParser::parse(json_missing_comma), std::runtime_error);
+  ASSERT_THROW(jsonParser::parse(json_missing_comma), std::exception);
 }
 
 TEST(jsonParserTest, FindDiffTest) {

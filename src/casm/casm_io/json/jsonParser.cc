@@ -1,7 +1,9 @@
+#include "casm/casm_io/json/jsonParser.hh"
+
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
-#include "casm/casm_io/json/jsonParser.hh"
+
 #include "casm/misc/CASM_math.hh"
 
 namespace CASM {
@@ -9,27 +11,27 @@ namespace CASM {
 /// Functions for converting basic types to/from json
 
 jsonParser &to_json(bool value, jsonParser &json) {
-  *((json_spirit::mValue *)&json) = json_spirit::mValue(value);
+  json.self() = value;
   return json;
 }
 
 jsonParser &to_json(int value, jsonParser &json) {
-  *((json_spirit::mValue *)&json) = json_spirit::mValue(value);
+  json.self() = value;
   return json;
 }
 
 jsonParser &to_json(unsigned int value, jsonParser &json) {
-  *((json_spirit::mValue *)&json) = json_spirit::mValue(uint64_t(value));
+  json.self() = uint64_t(value);
   return json;
 }
 
 jsonParser &to_json(const long int value, jsonParser &json) {
-  *((json_spirit::mValue *)&json) = json_spirit::mValue(int64_t(value));
+  json.self() = int64_t(value);
   return json;
 }
 
 jsonParser &to_json(const unsigned long int value, jsonParser &json) {
-  *((json_spirit::mValue *)&json) = json_spirit::mValue(uint64_t(value));
+  json.self() = uint64_t(value);
   return json;
 }
 
@@ -41,18 +43,18 @@ jsonParser &to_json(double value, jsonParser &json) {
   } else if (value == -1.0 / 0.0) {
     return to_json("-inf", json);
   } else {
-    *((json_spirit::mValue *)&json) = json_spirit::mValue(value);
+    json.self() = value;
     return json;
   }
 }
 
 jsonParser &to_json(const std::string &value, jsonParser &json) {
-  *((json_spirit::mValue *)&json) = json_spirit::mValue(value);
+  json.self() = value;
   return json;
 }
 
 jsonParser &to_json(const char *value, jsonParser &json) {
-  *((json_spirit::mValue *)&json) = json_spirit::mValue(value);
+  json.self() = value;
   return json;
 }
 
@@ -76,39 +78,37 @@ void to_json(fs::path file_path, jsonParser &json) {
 
 template <>
 bool from_json<bool>(const jsonParser &json) {
-  return json.get_bool();
+  return json.self().get<bool>();
 }
 
 template <>
 int from_json<int>(const jsonParser &json) {
-  return json.get_int();
+  return json.self().get<int>();
 }
 
 template <>
 unsigned int from_json<unsigned int>(const jsonParser &json) {
-  return (unsigned int)json.get_int();
+  return json.self().get<unsigned int>();
 }
 
 template <>
 long int from_json<long int>(const jsonParser &json) {
-  return (long int)json.get_int64();
+  return json.self().get<int64_t>();
 }
 
 template <>
 unsigned long int from_json<unsigned long int>(const jsonParser &json) {
-  return (unsigned long int)json.get_uint64();
+  return json.self().get<uint64_t>();
 }
 
 template <>
 double from_json<double>(const jsonParser &json) {
-  double d;
-  from_json(d, json);
-  return d;
+  return json.self().get<double>();
 }
 
 template <>
 std::string from_json<std::string>(const jsonParser &json) {
-  return json.get_str();
+  return json.self().get<std::string>();
 }
 
 template <>
@@ -116,25 +116,29 @@ jsonParser from_json<jsonParser>(const jsonParser &json) {
   return json;
 }
 
-void from_json(bool &value, const jsonParser &json) { value = json.get_bool(); }
+void from_json(bool &value, const jsonParser &json) {
+  json.self().get_to(value);
+}
 
-void from_json(int &value, const jsonParser &json) { value = json.get_int(); }
+void from_json(int &value, const jsonParser &json) {
+  json.self().get_to(value);
+}
 
 void from_json(unsigned int &value, const jsonParser &json) {
-  value = json.get_int();
+  json.self().get_to(value);
 }
 
 void from_json(long int &value, const jsonParser &json) {
-  value = json.get_int64();
+  json.self().get_to(value);
 }
 
 void from_json(unsigned long int &value, const jsonParser &json) {
-  value = json.get_uint64();
+  json.self().get_to(value);
 }
 
 void from_json(double &value, const jsonParser &json) {
   if (json.is_string()) {
-    std::string str = json.get_str();
+    std::string str = json.self().get<std::string>();
     if (str == "nan") {
       value = sqrt(-1.0);
     } else if (str == "inf") {
@@ -148,24 +152,25 @@ void from_json(double &value, const jsonParser &json) {
           str + "'");
     }
   } else {
-    value = json.get_real();
+    json.self().get_to(value);
   }
 }
 
 void from_json(std::string &value, const jsonParser &json) {
-  value = json.get_str();
+  json.self().get_to(value);
 }
 
 void from_json(jsonParser &value, const jsonParser &json) { value = json; }
 
 void from_json(fs::path &value, const jsonParser &json) {
-  value = fs::path(json.get_str());
+  value = json.get<std::string>();
 }
 
 // ---- Read/Print JSON  ----------------------------------
 
 bool jsonParser::read(std::istream &stream) {
-  return json_spirit::read_stream(stream, (json_spirit::mValue &)*this);
+  stream >> self();
+  return true;  // TODO: check this? should throw for errors
 }
 
 bool jsonParser::read(const fs::path &file_path) {
@@ -186,9 +191,13 @@ std::istream &operator>>(std::istream &stream, jsonParser &json) {
 /// Writes json to stream
 void jsonParser::print(std::ostream &stream, unsigned int indent,
                        unsigned int prec) const {
-  json_spirit::write_stream((json_spirit::mValue &)*this, stream, indent, prec,
-                            json_spirit::pretty_print | json_spirit::raw_utf8 |
-                                json_spirit::single_line_arrays);
+  // json_spirit::write_stream(
+  //   (json_spirit::mValue &)*this, stream, indent, prec,
+  //   json_spirit::pretty_print | json_spirit::raw_utf8 |
+  //       json_spirit::single_line_arrays);
+
+  // TODO: formatting prec, single_line_arrays
+  stream << self().dump(indent);
 };
 
 /// Write json to file
@@ -215,7 +224,7 @@ std::ostream &operator<<(std::ostream &stream, const jsonParser &json) {
 }
 
 bool jsonParser::almost_equal(const jsonParser &B, double tol) const {
-  if (type() != B.type()) {
+  if (self().type() != B.self().type()) {
     return false;
   }
 
@@ -250,59 +259,56 @@ bool jsonParser::almost_equal(const jsonParser &B, double tol) const {
 // ------ Type Checking Methods ------------------------------------
 
 /// Check if null type
-bool jsonParser::is_null() const { return type() == json_spirit::null_type; }
+bool jsonParser::is_null() const { return self().is_null(); }
 
 /// Check if bool type
-bool jsonParser::is_bool() const { return type() == json_spirit::bool_type; }
+bool jsonParser::is_bool() const { return self().is_boolean(); }
 
 /// Check if int type
-bool jsonParser::is_int() const { return type() == json_spirit::int_type; }
+bool jsonParser::is_int() const { return self().is_number_integer(); }
 
 /// Check if number type (not including int)
-bool jsonParser::is_float() const { return type() == json_spirit::real_type; }
+bool jsonParser::is_float() const { return self().is_number_float(); }
 
 /// Check if number type (including int)
-bool jsonParser::is_number() const { return is_int() || is_float(); }
+bool jsonParser::is_number() const { return self().is_number(); }
 
 /// Check if string
-bool jsonParser::is_string() const { return type() == json_spirit::str_type; }
+bool jsonParser::is_string() const { return self().is_string(); }
 
 /// Check if object type
-bool jsonParser::is_obj() const { return type() == json_spirit::obj_type; }
+bool jsonParser::is_obj() const { return self().is_object(); }
 
 /// Check if array type
-bool jsonParser::is_array() const { return type() == json_spirit::array_type; }
+bool jsonParser::is_array() const { return self().is_array(); }
 
 // ---- Navigate the JSON data: ----------------------------
 
 /// Return a reference to the sub-jsonParser (JSON value) with 'name' if it
 /// exists
-///   If it does not exist, create it with value == 'null' and return a
+///   If it does not exist, create it with empty object and return a
 ///   reference
 jsonParser &jsonParser::operator[](const std::string &name) {
-  json_spirit::mObject &obj = get_obj();
-  json_spirit::mObject::iterator it = obj.find(name);
-
-  // if 'name' not found, add it and with value 'null'
-  if (it == obj.end()) {
-    obj[name] = json_spirit::mValue(json_spirit::mObject());
+  auto it = self().find(name);
+  // if 'name' not found, add it as an empty object
+  if (it == self().end()) {
+    auto result = self().emplace(name, nlohmann::json::object());
+    it = result.first;
   }
-  return (jsonParser &)obj[name];
+  return (jsonParser &)*it;
 }
 
 /// Return a reference to the sub-jsonParser (JSON value) with 'name' if it
 /// exists.
 ///   Will throw if the 'name' doesn't exist.
 const jsonParser &jsonParser::operator[](const std::string &name) const {
-  const json_spirit::mObject &obj = get_obj();
-  json_spirit::mObject::const_iterator it = obj.find(name);
-
+  auto it = self().find(name);
   // if 'name' not found, add it and with value 'null'
-  if (it == obj.end()) {
+  if (it == self().end()) {
     throw std::runtime_error("JSON const operator[] access, but " + name +
                              " does not exist");
   }
-  return (const jsonParser &)it->second;
+  return (const jsonParser &)*it;
 }
 
 /// Return a reference to the sub-jsonParser (JSON value) with specified
@@ -382,13 +388,13 @@ const jsonParser &jsonParser::at(const fs::path &path) const {
 /// Return a reference to the sub-jsonParser (JSON value) from index 'element'
 /// iff jsonParser is a JSON array
 jsonParser &jsonParser::operator[](const size_type &element) {
-  return (jsonParser &)get_array()[element];
+  return (jsonParser &)self()[element];
 }
 
 /// Return a const reference to the sub-jsonParser (JSON value) from index
 /// 'element' iff jsonParser is a JSON array
 const jsonParser &jsonParser::operator[](const size_type &element) const {
-  return (const jsonParser &)get_array()[element];
+  return (const jsonParser &)self()[element];
 }
 
 /// Return a reference to the sub-jsonParser (JSON value) from index 'element'
@@ -401,7 +407,7 @@ jsonParser &jsonParser::at(const size_type &element) {
   if (!(element < size())) {
     throw std::out_of_range("Error in jsonParser::at: out of range");
   }
-  return (jsonParser &)get_array()[element];
+  return (jsonParser &)self()[element];
 }
 
 /// Return a const reference to the sub-jsonParser (JSON value) from index
@@ -414,7 +420,7 @@ const jsonParser &jsonParser::at(const size_type &element) const {
   if (!(element < size())) {
     throw std::out_of_range("Error in jsonParser::at: out of range");
   }
-  return (const jsonParser &)get_array()[element];
+  return (const jsonParser &)self()[element];
 }
 
 namespace {
@@ -482,24 +488,12 @@ fs::path find_diff(const jsonParser &A, const jsonParser &B, double tol) {
 }
 
 /// Returns array size if *this is a JSON array, object size if *this is a JSON
-/// object, 1 otherwise
-jsonParser::size_type jsonParser::size() const {
-  if (is_obj())
-    return get_obj().size();
-  else if (is_array())
-    return get_array().size();
-  else
-    return 1;
-}
+/// object, 0 if null, 1 otherwise
+jsonParser::size_type jsonParser::size() const { return self().size(); }
 
 /// Returns iterator to beginning of JSON object or JSON array
 jsonParser::iterator jsonParser::begin() {
-  if (is_obj())
-    return iterator(this, get_obj().begin());
-  else if (is_array())
-    return iterator(this, get_array().begin());
-  else
-    return iterator(this, 0);
+  return iterator(this, self().begin());
 }
 
 /// Returns const_iterator to beginning of JSON object or JSON array
@@ -507,51 +501,33 @@ jsonParser::const_iterator jsonParser::begin() const { return cbegin(); }
 
 /// Returns const iterator to beginning of const JSON object or JSON array
 jsonParser::const_iterator jsonParser::cbegin() const {
-  if (is_obj())
-    return const_iterator(this, get_obj().cbegin());
-  else if (is_array())
-    return const_iterator(this, get_array().cbegin());
-  else
-    return const_iterator(this, 0);
+  return const_iterator(this, self().begin());
 }
 
 /// Returns iterator to end of JSON object or JSON array
-jsonParser::iterator jsonParser::end() {
-  if (is_obj())
-    return iterator(this, get_obj().end());
-  else if (is_array())
-    return iterator(this, get_array().end());
-  else
-    return iterator(this, 1);
-}
+jsonParser::iterator jsonParser::end() { return iterator(this, self().end()); }
 
 /// Returns iterator to end of JSON object or JSON array
 jsonParser::const_iterator jsonParser::end() const { return cend(); }
 
 /// Returns const_iterator to end of JSON object or JSON array
 jsonParser::const_iterator jsonParser::cend() const {
-  if (is_obj())
-    return const_iterator(this, get_obj().cend());
-  else if (is_array())
-    return const_iterator(this, get_array().cend());
-  else
-    return const_iterator(this, 1);
+  return const_iterator(this, self().end());
 }
 
 /// Return iterator to JSON object value with 'name'
 jsonParser::iterator jsonParser::find(const std::string &name) {
-  return iterator(this, get_obj().find(name));
+  return iterator(this, self().find(name));
 }
 
 /// Return const_iterator to JSON object value with 'name'
 jsonParser::const_iterator jsonParser::find(const std::string &name) const {
-  return const_iterator(this, get_obj().find(name));
+  return const_iterator(this, self().find(name));
 }
 
 /// Return iterator to sub-object or element, or 'end' if not found
 ///
-/// - If path.empty(), return iterator that dereferences to this, and one
-/// increment results in end
+/// - If path.empty(), throw
 jsonParser::iterator jsonParser::find_at(const fs::path &path) {
   if (!path.is_relative()) {
     throw std::invalid_argument(
@@ -559,7 +535,9 @@ jsonParser::iterator jsonParser::find_at(const fs::path &path) {
         "relative");
   }
   if (path.empty()) {
-    return jsonParser::iterator(this, 0);
+    throw std::invalid_argument(
+        "Error in jsonParser::operator[](const fs::path &path): "
+        "path must not be empty");
   }
   jsonParser *curr = this;
   jsonParser::iterator res = this->end();
@@ -603,8 +581,8 @@ bool jsonParser::contains(const std::string &name) const {
 
 /// Erase key:value pair from an object
 ///   Returns the number of elements erased, which will be 0 or 1
-json_spirit::mObject::size_type jsonParser::erase(const std::string &name) {
-  return get_obj().erase(name);
+jsonParser::size_type jsonParser::erase(const std::string &name) {
+  return self().erase(name);
 }
 
 // ---- static Methods -------------------------------------
@@ -617,11 +595,7 @@ jsonParserIterator<IsConst>::jsonParserIterator() {}
 
 template <bool IsConst>
 jsonParserIterator<IsConst>::jsonParserIterator(const jsonParserIterator &iter)
-    : parser(iter.parser),
-      type(iter.type),
-      obj_iter(iter.obj_iter),
-      array_iter(iter.array_iter),
-      val_iter(iter.val_iter) {}
+    : parser(iter.parser), m_it(iter.m_it) {}
 
 template <bool IsConst>
 jsonParserIterator<IsConst> &jsonParserIterator<IsConst>::operator=(
@@ -633,80 +607,25 @@ jsonParserIterator<IsConst> &jsonParserIterator<IsConst>::operator=(
 template <bool IsConst>
 jsonParserIterator<IsConst>::jsonParserIterator(
     typename jsonParserIterator<IsConst>::pointer j,
-    const typename jsonParserIterator<IsConst>::object_iterator &iter)
-    : parser(j), type(json_spirit::obj_type), obj_iter(iter) {}
-
-template <bool IsConst>
-jsonParserIterator<IsConst>::jsonParserIterator(
-    typename jsonParserIterator<IsConst>::pointer j,
-    const typename jsonParserIterator<IsConst>::array_iterator &iter)
-    : parser(j), type(json_spirit::array_type), array_iter(iter) {}
-
-template <bool IsConst>
-jsonParserIterator<IsConst>::jsonParserIterator(
-    typename jsonParserIterator<IsConst>::pointer j, const int &iter)
-    : parser(j), type(json_spirit::null_type), val_iter(iter) {}
+    const typename jsonParserIterator<IsConst>::iterator &iter)
+    : parser(j), m_it(iter) {}
 
 template <bool IsConst>
 typename jsonParserIterator<IsConst>::reference
 jsonParserIterator<IsConst>::operator*() const {
-  if (type == json_spirit::obj_type)
-    return (reference)obj_iter->second;
-  else if (type == json_spirit::array_type)
-    return (reference)*array_iter;
-  else
-    return *parser;
+  return (reference)*m_it;
 }
 
 template <bool IsConst>
 typename jsonParserIterator<IsConst>::pointer
 jsonParserIterator<IsConst>::operator->() const {
-  if (type == json_spirit::obj_type)
-    return (pointer)&obj_iter->second;
-  else if (type == json_spirit::array_type)
-    return (pointer) & (*array_iter);
-  else
-    return parser;
+  return (pointer) & (*m_it);
 }
 
 template <bool IsConst>
 bool jsonParserIterator<IsConst>::operator==(
     const jsonParserIterator &iter) const {
-  if (parser != iter.parser) {
-    return false;
-  }
-
-  bool this_is_end = this->is_end();
-  bool that_is_end = iter.is_end();
-
-  if (this_is_end && that_is_end) {
-    return true;
-  } else if (this_is_end != that_is_end) {
-    return false;
-  } else {
-    if (type == json_spirit::obj_type) {
-      return obj_iter == iter.obj_iter;
-    } else if (type == json_spirit::array_type) {
-      return array_iter == iter.array_iter;
-    } else if (type == json_spirit::null_type) {
-      return val_iter == iter.val_iter;
-    }
-  }
-
-  return false;
-}
-
-template <bool IsConst>
-bool jsonParserIterator<IsConst>::is_end() const {
-  if (type == json_spirit::obj_type && obj_iter == parser->get_obj().end()) {
-    return true;
-  } else if (type == json_spirit::array_type &&
-             array_iter == parser->get_array().end()) {
-    return true;
-  } else if (type == json_spirit::null_type && val_iter == 1) {
-    return true;
-  }
-  return false;
+  return m_it == iter.m_it;
 }
 
 template <bool IsConst>
@@ -717,93 +636,55 @@ bool jsonParserIterator<IsConst>::operator!=(
 
 template <bool IsConst>
 jsonParserIterator<IsConst> &jsonParserIterator<IsConst>::operator++() {
-  if (type == json_spirit::obj_type) {
-    ++obj_iter;
-    return *this;
-  } else if (type == json_spirit::array_type) {
-    ++array_iter;
-    return *this;
-  } else {
-    ++val_iter;
-    return *this;
-  }
+  ++m_it;
+  return *this;
 }
 
 template <bool IsConst>
 jsonParserIterator<IsConst> jsonParserIterator<IsConst>::operator++(int) {
   jsonParserIterator cp(*this);
-
-  if (type == json_spirit::obj_type) {
-    ++obj_iter;
-    return cp;
-  } else if (type == json_spirit::array_type) {
-    ++array_iter;
-    return cp;
-  } else {
-    ++val_iter;
-    return cp;
-  }
+  ++m_it;
+  return cp;
 }
 
 template <bool IsConst>
 jsonParserIterator<IsConst> &jsonParserIterator<IsConst>::operator--() {
-  if (type == json_spirit::obj_type) {
-    --obj_iter;
-    return *this;
-  } else if (type == json_spirit::array_type) {
-    --array_iter;
-    return *this;
-  } else {
-    --val_iter;
-    return *this;
-  }
+  --m_it;
+  return *this;
 }
 
 template <bool IsConst>
 jsonParserIterator<IsConst> jsonParserIterator<IsConst>::operator--(int) {
   jsonParserIterator<IsConst> cp(*this);
-
-  if (type == json_spirit::obj_type) {
-    --obj_iter;
-    return cp;
-  } else if (type == json_spirit::array_type) {
-    --array_iter;
-    return cp;
-  } else {
-    --val_iter;
-    return cp;
-  }
+  --m_it;
+  return cp;
 }
 
 template <bool IsConst>
 jsonParserIterator<IsConst>::operator jsonParser::const_iterator() const {
-  if (type == json_spirit::obj_type)
-    return jsonParser::const_iterator(parser, obj_iter);
-  else if (type == json_spirit::array_type)
-    return jsonParser::const_iterator(parser, array_iter);
-  else
-    return jsonParser::const_iterator(parser, val_iter);
+  return jsonParser::const_iterator(parser, m_it);
 }
 
 /// When iterating over a JSON object, returns the 'name' of the 'name':value
 /// pair the iterator is pointing at
 template <bool IsConst>
-std::string jsonParserIterator<IsConst>::name() const {
-  if (type == json_spirit::obj_type)
-    return obj_iter->first;
-  else
-    throw std::runtime_error("Calling 'name' on non-object jsonParserIterator");
+std::string const &jsonParserIterator<IsConst>::name() const {
+  return m_it.key();
+}
+
+/// When iterating over a JSON object, returns the 'name' of the 'name':value
+/// pair the iterator is pointing at
+template <bool IsConst>
+std::string const &jsonParserIterator<IsConst>::key() const {
+  return m_it.key();
 }
 
 template <bool IsConst>
 void swap(jsonParserIterator<IsConst> &a, jsonParserIterator<IsConst> &b) {
   using std::swap;
 
-  std::swap(a.parser, b.parser);
-  swap(a.type, b.type);
-  swap(a.obj_iter, b.obj_iter);
-  swap(a.array_iter, b.array_iter);
-  swap(a.val_iter, b.val_iter);
+  swap(a.parser, b.parser);
+  swap(a.m_it, b.m_it);
 }
 
 template class jsonParserIterator<true>;

@@ -4,11 +4,12 @@
 #include <complex>
 #include <exception>
 
-#include "casm/external/json_spirit/json_spirit_reader_template.h"
-#include "casm/external/json_spirit/json_spirit_writer_template.h"
+// It is recommended to turn off implicit conversions from JSON
+// and leaving them on breaks jsonParser
+#define JSON_USE_IMPLICIT_CONVERSIONS 0
+#include "casm/external/nlohmann/json.hpp"
 #include "casm/global/filesystem.hh"
 #include "casm/misc/CASM_TMP.hh"
-
 
 namespace CASM {
 
@@ -76,16 +77,19 @@ class jsonParserIterator;
 ///     json.write(file);
 ///     file.close();
 ///
-class jsonParser : public json_spirit::mValue {
+class jsonParser : public nlohmann::json {
  public:
-  typedef json_spirit::mObject::size_type size_type;
+  typedef nlohmann::json::size_type size_type;
   typedef jsonParserIterator<false> iterator;
   typedef jsonParserIterator<true> const_iterator;
 
   // ---- Constructors  ----------------------------------
 
-  /// Create a new empty jsonParser
-  jsonParser() : json_spirit::mValue(json_spirit::mObject()) {}
+  /// Create a new jsonParser, an empty object
+  jsonParser() : nlohmann::json(nlohmann::json::object()) {}
+
+  /// Create a new jsonParser, from a nlohmann::json object
+  explicit jsonParser(nlohmann::json const &_json) : nlohmann::json(_json) {}
 
   /// Create a jsonParser from any other object for which 'to_json(t, json)' is
   /// defined
@@ -138,34 +142,39 @@ class jsonParser : public json_spirit::mValue {
 
   // ---- Value level printing options: ---------------------
 
-  /// Force array printing as column
-  using json_spirit::mValue::set_force_column;
+  // /// Force array printing as column
+  // using json_spirit::mValue::set_force_column;
+  //
+  // /// Force array printing as row
+  // using json_spirit::mValue::set_force_row;
+  //
+  // /// Force printing double using scientific notation
+  // using json_spirit::mValue::set_scientific;
+  //
+  // /// Remove trailing zeros for real (double) values
+  // using json_spirit::mValue::set_remove_trailing_zeros;
+  //
+  // /// Do not force array printing as column
+  // using json_spirit::mValue::unset_force_column;
+  //
+  // /// Do not force array printing as row
+  // using json_spirit::mValue::unset_force_row;
+  //
+  // /// Do not force printing double using scientific notation
+  // using json_spirit::mValue::unset_scientific;
+  //
+  // /// Do not remove trailing zeros for real (double) values
+  // using json_spirit::mValue::unset_remove_trailing_zeros;
 
-  /// Force array printing as row
-  using json_spirit::mValue::set_force_row;
+  void set_force_column() const {
+    // set_force_column is not yet supported with nlohmann::json
+  }
 
-  /// Force printing double using scientific notation
-  using json_spirit::mValue::set_scientific;
-
-  /// Remove trailing zeros for real (double) values
-  using json_spirit::mValue::set_remove_trailing_zeros;
-
-  /// Do not force array printing as column
-  using json_spirit::mValue::unset_force_column;
-
-  /// Do not force array printing as row
-  using json_spirit::mValue::unset_force_row;
-
-  /// Do not force printing double using scientific notation
-  using json_spirit::mValue::unset_scientific;
-
-  /// Do not remove trailing zeros for real (double) values
-  using json_spirit::mValue::unset_remove_trailing_zeros;
-
-  using json_spirit::mValue::operator==;
-
+  bool operator==(const jsonParser &json) const {
+    return (self() == json.self());
+  }
   bool operator!=(const jsonParser &json) const {
-    return !(json_spirit::mValue::operator==(json));
+    return !(self() == json.self());
   }
 
   bool almost_equal(const jsonParser &B, double tol) const;
@@ -182,6 +191,22 @@ class jsonParser : public json_spirit::mValue {
   bool is_array() const;
 
   // ---- Navigate the JSON data: ----------------------------
+
+  // /// Return a reference to the sub-jsonParser (JSON value) with 'name' if it
+  // /// exists
+  // ///   If it does not exist, create it with an empty JSON object and return
+  // a
+  // ///   reference to it
+  // jsonParser &operator[](const char *name) {
+  //   return (*this)[std::string(name)];
+  // }
+  //
+  // /// Return a reference to the sub-jsonParser (JSON value) with 'name' if it
+  // /// exists.
+  // ///   Will throw if the 'name' doesn't exist.
+  // const jsonParser &operator[](const char *name) const {
+  //   return (*this)[std::string(name)];
+  // }
 
   /// Return a reference to the sub-jsonParser (JSON value) with 'name' if it
   /// exists
@@ -355,9 +380,6 @@ class jsonParser : public json_spirit::mValue {
   /// Puts new empty JSON array
   jsonParser &put_array() { return *this = array(); }
 
-  /// Puts new JSON array
-  jsonParser &put_array(size_type N) { return *this = array(N); }
-
   /// Puts new JSON array, using the same value
   template <typename T>
   jsonParser &put_array(size_type N, const T &t);
@@ -386,10 +408,7 @@ class jsonParser : public json_spirit::mValue {
   static jsonParser parse(std::istream &stream) { return jsonParser(stream); }
 
   /// Returns an empty json object
-  static jsonParser object() {
-    jsonParser json;
-    return json = json_spirit::mValue(json_spirit::mObject());
-  }
+  static jsonParser object() { return jsonParser(); }
 
   /// Puts new JSON object, from iterators over a range of values of type
   /// std::pair<std::string, T>
@@ -400,16 +419,7 @@ class jsonParser : public json_spirit::mValue {
   }
 
   /// Returns an empty json array
-  static jsonParser array() {
-    jsonParser json;
-    return json = json_spirit::mValue(json_spirit::mArray());
-  }
-
-  /// Returns an empty json array
-  static jsonParser array(size_type N) {
-    jsonParser json;
-    return json = json_spirit::mValue(json_spirit::mArray(N));
-  }
+  static jsonParser array() { return jsonParser(nlohmann::json::array()); }
 
   /// Puts new JSON array, using the same value
   template <typename T>
@@ -428,16 +438,13 @@ class jsonParser : public json_spirit::mValue {
   }
 
   /// Returns a null JSON value
-  static jsonParser null() {
-    jsonParser json;
-    return json = json_spirit::mValue();
-  }
+  static jsonParser null() { return jsonParser(nlohmann::json()); }
+
+  nlohmann::json &self() { return (nlohmann::json &)*this; }
+  nlohmann::json const &self() const { return (nlohmann::json &)*this; }
 
  private:
-  jsonParser &operator=(const json_spirit::mValue &value) {
-    this->json_spirit::mValue::operator=(value);
-    return *this;
-  }
+  // nlohmann::json m_self;
 };
 
 std::ostream &operator<<(std::ostream &stream, const jsonParser &json);
@@ -606,14 +613,8 @@ template <bool IsConst>
 class jsonParserIterator {
  public:
   typedef std::forward_iterator_tag iterator_category;
-  typedef
-      typename std::conditional<IsConst, json_spirit::mObject::const_iterator,
-                                json_spirit::mObject::iterator>::type
-          object_iterator;
-  typedef
-      typename std::conditional<IsConst, json_spirit::mArray::const_iterator,
-                                json_spirit::mArray::iterator>::type
-          array_iterator;
+  typedef typename std::conditional<IsConst, nlohmann::json::const_iterator,
+                                    nlohmann::json::iterator>::type iterator;
   typedef int difference_type;
   typedef typename std::conditional<IsConst, const jsonParser, jsonParser>::type
       value_type;
@@ -626,19 +627,13 @@ class jsonParserIterator {
 
   jsonParserIterator &operator=(jsonParserIterator iter);
 
-  jsonParserIterator(pointer j, const object_iterator &iter);
-
-  jsonParserIterator(pointer j, const array_iterator &iter);
-
-  jsonParserIterator(pointer j, const int &iter);
+  jsonParserIterator(pointer j, const iterator &iter);
 
   reference operator*() const;
 
   pointer operator->() const;
 
   bool operator==(const jsonParserIterator &iter) const;
-
-  bool is_end() const;
 
   bool operator!=(const jsonParserIterator &iter) const;
 
@@ -654,7 +649,11 @@ class jsonParserIterator {
 
   /// When iterating over a JSON object, returns the 'name' of the 'name':value
   /// pair the iterator is pointing at
-  std::string name() const;
+  std::string const &name() const;
+
+  /// When iterating over a JSON object, returns the 'name' of the 'name':value
+  /// pair the iterator is pointing at
+  std::string const &key() const;
 
   template <bool _IsConst>
   friend void swap(jsonParserIterator<_IsConst> &a,
@@ -663,11 +662,9 @@ class jsonParserIterator {
  private:
   pointer parser;
 
-  json_spirit::Value_type type;
+  nlohmann::json::value_t type;
 
-  object_iterator obj_iter;
-
-  array_iterator array_iter;
+  iterator m_it;
 
   int val_iter;
 };
@@ -678,7 +675,7 @@ template <typename T, typename... Args>
 jsonParser &jsonParser::push_back(const T &value, Args &&...args) {
   try {
     jsonParser json;
-    get_array().push_back(to_json(value, json, std::forward<Args>(args)...));
+    self().push_back(to_json(value, json, std::forward<Args>(args)...));
     return *this;
   } catch (...) {
     /// re-throw exceptions

@@ -1,6 +1,8 @@
 #ifndef CASM_DataFormatter_impl
 #define CASM_DataFormatter_impl
 
+#include <iomanip>
+
 #include "casm/casm_io/dataformatter/DataFormatter.hh"
 #include "casm/casm_io/dataformatter/DataFormatterTools.hh"
 #include "casm/casm_io/dataformatter/DataStream.hh"
