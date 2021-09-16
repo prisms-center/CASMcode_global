@@ -1,6 +1,8 @@
 #ifndef CASM_misc_UnaryCompare
 #define CASM_misc_UnaryCompare
 
+#include "casm/misc/type_traits.hh"
+
 namespace CASM {
 
 /// For any binary functor class that accepts two arguments, such as
