@@ -26,7 +26,7 @@ class jsonParserIterator;
  * @{
  */
 
-/// jsonParser allows for reading / writing JSON data
+/// \brief Reading / writing JSON data
 ///
 /// JSON consists of values, which can be of type:
 ///     object, array, float, int, str, null, bool
@@ -47,35 +47,175 @@ class jsonParserIterator;
 ///   So if they also exist for the type being contained,
 ///   you can read/write the entire object as a JSON array or nested JSON arrays
 ///
-/// Simple Usage:
+/// ## Simple Usage:
 ///
-///   Reading data from a JSON file:
+/// ### Reading data from JSON file / string / stream:
 ///
-///     jsonParser json("myfile.json");
+/// \code
+/// // read from file
+/// fs::path path = "myfile.json";
+/// jsonParser json(path);
+/// \endcode
 ///
-///   Three ways to get data of type T:
+/// \code
+/// // read from file
+/// jsonFile json("myfile.json");
+/// \endcode
 ///
-///     T t;
-///     from_json(t, json["path"]["to"]["object"]["data"]);  <-- use
-///     [std::string] for JSON values of any type t =
-///     json["path"]["to"]["object"]["data"].get<T>(); t =
-///     from_json<T>(json["path"]["to"]["array"][0]);   <-- use [int] for JSON
-///     arrays only
+/// \code
+/// // read from file
+/// jsonParser json = jsonParser::read("myfile.json");
+/// \endcode
 ///
-///   Check if 'name' in JSON object:
+/// \code
+/// // parse from JSON formatted string
+/// std::string str = "{\"key\":10}";
+/// jsonParser json = jsonParser::parse(str);
+/// \endcode
 ///
-///     if( json.contains("other_data") )
-///       from_json( array, json["other_data"]);
+/// \code
+/// // parse from JSON formatted string
+/// std::stringstream ss;
+/// ss << "{\"key\":10}";
+/// jsonParser json = jsonParser::parse(ss);
+/// \endcode
 ///
-///   Writing data to a JSON file:
+/// Note:
+/// - `jsonParser("myfile.json")` creates a JSON object with string value
+///   `"myfile.json"`, it does not read read from a file named `"myfile.json"`.
 ///
-///     jsonParser json;
-///     json["mydata"].put(mydata);        <-- if ["mydata"] does not exist, it
-///     is created, else overwrites json["more_data"].put(more_data);
+/// ### Ways to get data of type T:
 ///
-///     ofstream file("myfile.json");
-///     json.write(file);
-///     file.close();
+/// Note:
+/// - In the following, any additional arguments (`...args`) provided are
+///   forward to the JSON parsing implementation for the particular type being
+///   parsed. Basic types (i.e. bool, int, double, std::string, etc.) do not
+///   require any additional arguments.
+///
+/// \code
+/// // assign value
+/// T t;
+/// from_json(t, json["path"]["to"]["object"]["data"], Args &&...args);
+/// \endcode
+///
+/// \code
+/// // construct value
+/// T t = json["path"]["to"]["array"][0].get<T>(Args &&...args);
+/// \endcode
+///
+/// \code
+/// // assign from value of "key" attribute
+/// T t;
+/// json["key"].get(t, Args &&...args);
+/// \endcode
+///
+/// \code
+/// // only assign if "key" attribute exists
+/// T t;
+/// json.get_if(t, "key", Args &&...args);
+/// \endcode
+///
+/// \code
+/// // construct value from attribute, if "key" attribute exists,
+/// // else return 'default_value'
+/// T default_value = ...;
+/// T t = json.get_if_else(t, "key", default_value, Args &&...args);
+/// \endcode
+///
+/// \code
+/// // construct value in std::unique_ptr
+/// std::unique_ptr<T> t = json["path"]["to"]["array"][0].make<T>(
+///     Args &&...args);
+/// \endcode
+///
+/// \seealso jsonParser::make_if, jsonParser::make_optional,
+///     jsonParser::make_if_else, jsonParser::make_else,
+///
+/// ### Accessing object attributes and array elements:
+///
+/// - Use `jsonParser::operator[](std::string const&)` for accessing JSON
+///   object properties. Non-const version will construct an empty JSON object
+///   if the attribute does not already exist; const version will throw.
+/// - Use `jsonParser::at(fs::path const&)` for accessing multiple levels of a
+///   JSON document
+///   - If `fs::path path = "A/B/C"`, then `json[path]` is equivalent to
+///     `json[A][B][C]`
+///   - If any sub-jsonParser is an array, it will attempt to convert the
+///     filename to int
+///   - Will throw if does not exist
+/// - Use `jsonParser::operator[](size_type const &)` for accessing array
+///   elments
+/// - Use `jsonParser::find(std::string const&)` to return an iterator.
+/// - Use `jsonParser::find_at(fs::path const&)` to access multiple levels of a
+///   JSON document.
+///
+/// ### Check if an attribute with a particular 'name' exists:
+///
+/// \code
+/// if( json.contains("key") ) {
+///      json["key"].get(value);
+/// }
+/// \endcode
+///
+/// \code
+/// auto it = json.find("key");
+/// if( it != json.end() ) {
+///     value = it->get<T>();
+/// }
+/// \endcode
+///
+/// \code
+/// auto it = json.find_at("key1/key2/key3");
+/// if( it != json.end() ) {
+///     value = it->get<T>();
+/// }
+/// \endcode
+///
+///
+/// ### Format data to JSON:
+///
+/// \code
+/// jsonParser json;
+/// T t = ...;
+/// to_json(t, json["key"]);
+/// \endcode
+///
+/// \code
+/// jsonParser json;
+/// T t = ...;
+/// json["key"] = t;
+/// \endcode
+///
+/// \code
+/// jsonParser json = jsonParser::array();
+/// for (int i=0; i<10; ++i) {
+///   json.push_back(i);
+/// }
+/// \endcode
+///
+/// \code
+/// jsonParser json;
+/// std::vector<int> v = {0, 1, 2, 3, 4};
+/// json.put_array(v.begin(), v.end());
+/// \endcode
+///
+/// \code
+/// jsonParser json;
+/// int n = 5;
+/// std::string value = "value"
+/// json.put_array(n, value);
+/// \endcode
+///
+///
+/// ### Writing data to a JSON file:
+///
+/// \code
+/// jsonParser json;
+/// // ... add data to json ...
+/// ofstream file("myfile.json");
+/// json.write(file);
+/// file.close();
+/// \endcode
 ///
 class jsonParser : public nlohmann::json {
  public:
@@ -515,6 +655,7 @@ template <typename Key, typename T>
 void from_json(std::pair<Key, T> &value, const jsonParser &json);
 
 /// \brief Helper struct for constructing objects that need additional data
+///     beyond what is in the JSON data
 ///
 /// \code jsonParser::get<T>(Args&&...args) \endcode is equivalent to:
 /// - \code jsonConstructor<T>::from_json(*this, args...) \endcode
@@ -530,7 +671,8 @@ struct jsonConstructor {
   }
 };
 
-/// \brief Helper struct for constructing objects that need additional data
+/// \brief Helper struct for constructing objects (in std::unique_ptr) that need
+///     additional data beyond what is in the JSON data
 ///
 /// \code jsonParser::make<T>(Args&&...args) \endcode is equivalent to:
 /// - \code jsonMake<T>::make_from_json(*this, args...) \endcode

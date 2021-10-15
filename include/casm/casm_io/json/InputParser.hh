@@ -16,8 +16,7 @@ namespace CASM {
 
 class Log;
 
-/// Base data structure for parsing values from JSON and storing error and
-/// warning messages
+/// \brief Base data structure for InputParser
 ///
 /// This contains two jsonParser references:
 /// - input: which is a reference to the top of the JSON document (technically,
@@ -64,6 +63,8 @@ class Log;
 ///
 /// The `make_report`, `print_errors` and `print_warnings` methods allow
 /// formatted output of error and warning messages.
+///
+/// \ingroup jsonParser
 struct KwargsParser : public Validator {
   /// Reference to the top of the JSON document being parsed
   jsonParser const &input;
@@ -179,8 +180,8 @@ struct KwargsParser : public Validator {
   map_type m_subparsers;
 };
 
-/// Constructs values from JSON and collects error and warning messages for easy
-/// printing, without throwing.
+/// \brief Constructs values from JSON and collects error and warning messages
+///     for printing, without throwing.
 ///
 /// To use InputParser for a type, T, you must write:
 ///    void parse(InputParser<T> &parser, ... any other required input ...);
@@ -227,6 +228,7 @@ struct KwargsParser : public Validator {
 /// the resulting value. So if parsing was successful you can get the
 /// constructed value with `*parser.value`.
 ///
+/// \ingroup jsonParser
 template <typename T>
 class InputParser : public KwargsParser {
  public:
@@ -383,40 +385,32 @@ class ParentInputParser : public InputParser<std::nullptr_t> {
         parent_input(_parent_input) {}
 };
 
-/// Parse Log "verbosity" level from JSON
-///
-/// Expected that parser.self.find("verbosity") returns iterator to:
-/// \code
-/// {
-///    "verbosity": <int or string, default=10, range=[0,100], "none" = 0,
-///    "quiet"=5,
-///                  "standard"=10, "verbose"=20, "debug"=100>
-/// }
-/// \endcode
+/// \brief Parse "verbosity" level from JSON
 int parse_verbosity(KwargsParser &parser, int default_verbosity = 10);
 
-/// Temporary -- enables compilation of legacy code
+/// \brief Temporary -- enables compilation of legacy code
 void parse(InputParser<std::nullptr_t> &parser);
 
+/// \brief Default parse method
 template <typename T>
 void parse(InputParser<T> &parser);
 
 // --- Methods for formatting error and warning messages ---
 
-/// Formatted print warning messages, including all subparsers
+/// \brief Formatted printing of warning messages, including all subparsers
 void print_warnings(KwargsParser const &parser, Log &log,
                     std::string header = "Warnings");
 
-/// Formatted print error messages, including all subparsers
+/// \brief Formatted printing of error messages, including all subparsers
 void print_errors(KwargsParser const &parser, Log &log,
                   std::string header = "Errors");
 
-/// Return parser.input with error and warning messages added in place,
-/// including all subparsers
+/// \brief Return parser.input with error and warning messages added in place,
+///     including all subparsers
 jsonParser make_report(KwargsParser const &parser);
 
-/// Print errors and warnings, throwing as specified if any errors exist in
-/// parser (and subparsers)
+/// \brief Print errors and warnings, throwing as specified if any errors exist
+///     in parser (and subparsers)
 template <typename ErrorType>
 void report_and_throw_if_invalid(KwargsParser const &parser, Log &log,
                                  ErrorType error);

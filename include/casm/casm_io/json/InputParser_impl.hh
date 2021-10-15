@@ -262,6 +262,12 @@ std::shared_ptr<InputParser<RequiredType>> InputParser<T>::parse_as(
   return subparser;
 }
 
+/// \brief Print errors and warnings, throwing as specified if any errors exist
+///     in parser (and subparsers)
+///
+/// See `::InputParser` for example usage.
+///
+/// \relates InputParser
 template <typename ErrorType>
 void report_and_throw_if_invalid(KwargsParser const &parser, Log &log,
                                  ErrorType error) {
@@ -282,6 +288,12 @@ void report_and_throw_if_invalid(KwargsParser const &parser, Log &log,
   }
 }
 
+/// \brief Default parse method
+///
+/// If `parser.exists()`, parses value using `parser.self.make<T>()`.
+/// Otherwise, stores a "could not construct" error message.
+///
+/// \relates InputParser
 template <typename T>
 void parse(InputParser<T> &parser) {
   if (parser.exists()) {

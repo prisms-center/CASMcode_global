@@ -9,7 +9,9 @@
 
 namespace CASM {
 
-/// \brief Remember how to use popen
+/// \brief C++ wrapper for running subprocesses using `popen`
+///
+/// \ingroup System
 class Popen {
  public:
   /// \brief Construct a Popen object

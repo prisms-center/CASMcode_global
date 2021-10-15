@@ -120,6 +120,32 @@ bool KwargsParser::warn_unnecessary(const std::set<std::string> &expected) {
   return all_necessary;
 }
 
+/// \brief Parse "verbosity" level from JSON
+///
+/// The verbosity level can be used with `::Log` to control the amount of output
+/// from some CASM methods.
+///
+/// Expected that parser.self.find("verbosity") returns iterator to:
+/// \code
+/// {
+///    "verbosity": <int or string>
+/// }
+/// \endcode
+///
+/// The following values are allowed for `"verbosity"`:
+/// - If integer:
+///   - Allowed range is `[0,100]`
+/// - If string:
+///   - "none" is equivalent to integer value 0
+///   - "quiet" is equivalent to integer value 5
+///   - "standard" is equivalent to integer value 10
+///   - "verbose" is equivalent to integer value 20
+///   - "debug" is equivalent to integer value 100
+/// - If `"verbosity"` is not found
+///   (`parser.self.find("verbosity")==parser.self.end()`), then
+///   `default_verbosity` is returned.
+///
+/// \relates InputParser
 int parse_verbosity(KwargsParser &parser, int default_verbosity) {
   auto it = parser.self.find("verbosity");
   if (it != parser.self.end()) {
@@ -145,8 +171,14 @@ int parse_verbosity(KwargsParser &parser, int default_verbosity) {
   }
 }
 
+/// \brief Temporary -- enables compilation of legacy code
+///
+/// \relates InputParser
 void parse(InputParser<std::nullptr_t> &parser) { return; }
 
+/// \brief Formatted printing of warning messages, including all subparsers
+///
+/// \relates InputParser
 void print_warnings(KwargsParser const &parser, Log &log, std::string header) {
   bool top = false;
   if (!header.empty()) {
@@ -165,6 +197,9 @@ void print_warnings(KwargsParser const &parser, Log &log, std::string header) {
   if (top) log << std::endl;
 }
 
+/// \brief Formatted printing of error messages, including all subparsers
+///
+/// \relates InputParser
 void print_errors(KwargsParser const &parser, Log &log, std::string header) {
   bool top = false;
   if (!header.empty()) {

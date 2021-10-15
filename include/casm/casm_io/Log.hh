@@ -10,42 +10,26 @@
 
 namespace CASM {
 
+/**
+ * \defgroup LogGroup Log
+ *
+ * \brief Classes and functions for logging.
+ *
+ * \ingroup casmIO
+ *
+ */
+
 class Log;
 struct LogText;
 struct LogParagraph;
 struct LogVerbatim;
 
+/// \brief Paragraph justification for `Log::paragraph`
+///
+/// \ingroup LogGroup
 enum class JustificationType { Left, Right, Center, Full };
 
-struct LogText : public notstd::Cloneable {
-  ABSTRACT_CLONEABLE(LogText)
-
-  explicit LogText(std::string _text) : text(_text) {}
-
-  std::string text;
-
-  virtual void print(Log &log) const = 0;
-};
-
-struct LogParagraph : public LogText {
-  CLONEABLE(LogParagraph)
-
-  explicit LogParagraph(std::string _text) : LogText(_text) {}
-
-  virtual void print(Log &log) const override;
-};
-
-struct LogVerbatim : public LogText {
-  CLONEABLE(LogVerbatim)
-
-  explicit LogVerbatim(std::string _text, bool _indent_first_line = true)
-      : LogText(_text), indent_first_line(_indent_first_line) {}
-
-  bool indent_first_line;
-
-  virtual void print(Log &log) const override;
-};
-
+/// \brief Formatted logging
 class Log {
  public:
   static const int none = 0;
@@ -55,14 +39,6 @@ class Log {
   static const int debug = 100;
 
   /// \brief Construct a Log
-  ///
-  /// \param ostream The stream to print to
-  /// \param verbosity The amount to be printed
-  ///
-  /// For verbosity:
-  /// - 0: print nothing
-  /// - 10: print all standard output
-  /// - 100: print all possible output
   Log(std::ostream &_ostream = std::cout, int _verbosity = standard,
       bool _show_clock = false, int _indent_space = 2);
 
@@ -214,8 +190,10 @@ class Log {
 
   // --- Verbosity ---
 
+  /// \brief Get current verbosity level
   int verbosity() const;
 
+  /// \brief Set current verbosity level
   void set_verbosity(int _verbosity);
 
   template <int _required_verbosity>
@@ -226,22 +204,29 @@ class Log {
     return *this;
   }
 
+  /// \brief Reset underlying stream
   void reset(std::ostream &_ostream = std::cout);
 
   // --- Paragraph printing ---
 
+  /// \brief Set width used for following paragraphs
   void set_width(int width) { m_paragraph_width = width; }
 
+  /// \brief Set width used for following paragraphs
   int width() const { return m_paragraph_width; }
 
+  /// \brief Set justification type used for following paragraphs
   void set_justification(JustificationType justification) {
     m_justification = justification;
   }
 
+  /// \brief Get current justification type
   JustificationType justification() { return m_justification; }
 
+  /// \brief Print indented, justified, paragraph with line wrapping
   Log &paragraph(std::string text);
 
+  /// \brief Print verbatim, but with indentation (optional on first line)
   Log &verbatim(std::string text, bool indent_first_line = true);
 
   // --- List printing
@@ -258,35 +243,82 @@ class Log {
 
   friend Log &operator<<(Log &log, std::ostream &(*fptr)(std::ostream &));
 
+  /// \brief Return reference to underlying stream
   operator std::ostream &();
 
+  /// \brief Return reference to underlying stream
   std::ostream &ostream() { return *m_ostream; }
 
+  /// \brief If true, indicates the current verbosity level is greater than or
+  ///     equal to the current required verbosity
   bool print() const;
 
+  /// \brief If true, indicates the current verbosity level is greater than or
+  ///     equal to the current required verbosity
   explicit operator bool() { return m_print; }
 
   // --- Indentation ---
   // Indentation is not coupled to sectioning
 
+  /// \brief Number of spaces per indent level
   int indent_space() const { return m_indent_space; }
 
+  /// \brief Set number of spaces per indent level
+  void set_indent_space(int _indent_space) { m_indent_space = _indent_space; }
+
+  /// \brief Indent level
+  int indent_level() const { return m_indent_level; }
+
+  /// \brief Set indent level
+  void set_indent_level(int _indent_level) { m_indent_level = _indent_level; }
+
+  /// \brief Number of initial spaces to indent
+  int initial_indent_space() const { return m_indent_spaces; }
+
+  /// \brief Set number of initial spaces to indent
+  void set_initial_indent_space(int _indent_spaces) {
+    m_indent_spaces = _indent_spaces;
+  }
+  /// \brief String of spaces used for indentation
+  ///
+  /// Equivalent to:
+  /// \code
+  /// std::string(this->indent_space() * this->indent_level()
+  ///             + this->initial_indent_space(), ' ');
+  /// \code
   std::string indent_str() const {
     return std::string(m_indent_space * m_indent_level + m_indent_spaces, ' ');
   }
 
+  /// \brief Increase the current indent level by 1
   void increase_indent() { m_indent_level++; }
 
+  /// \brief Decrease the current indent level by 1
   void decrease_indent() {
     if (m_indent_level > 0) {
       m_indent_level--;
     }
   }
 
+  /// \brief Increase, by n, the number of initial spaces to indent
   void increase_indent_spaces(int n) { m_indent_spaces += n; }
 
+  /// \brief Decrease, by n, the number of initial spaces to indent
   void decrease_indent_spaces(int n) { m_indent_spaces -= n; }
 
+  /// \brief Write spaces for the current indent level
+  ///
+  /// Equivalent to `(*this) << indent_str(); return *this`.
+  ///
+  /// Usage:
+  /// \code
+  /// Log log;
+  /// // ... use of log.increase_indent() and log.decrease_indent()
+  /// //     to set the current indent level ...
+  /// log.indent() << "text that should be indented..." << std::endl;
+  /// log << "text that should not be indented..." << std::endl;
+  /// \endcode
+  ///
   Log &indent() {
     (*this) << indent_str();
     return *this;
@@ -391,6 +423,12 @@ Log &Log::verbatim_list(OutputIterator begin, OutputIterator end,
   return *this;
 }
 
+/// \brief Write to Log, if verbosity level satisfied
+///
+/// If the Log's current verbosity level exceeds the Log's current required
+/// verbosity level, then the write occurs; otherwise the write does not occur.
+///
+/// \relates Log
 template <typename T>
 Log &operator<<(Log &log, const T &msg_details) {
   if (log._print()) {
@@ -399,9 +437,12 @@ Log &operator<<(Log &log, const T &msg_details) {
   return log;
 }
 
+/// \brief Write to Log, if verbosity level satisfied
 Log &operator<<(Log &log, std::ostream &(*fptr)(std::ostream &));
 
-/// A Log whose underlying ostream* cannot be reset
+/// \brief A Log whose underlying ostream* cannot be reset
+///
+/// \ingroup LogGroup
 class FixedLog : public Log {
  public:
   explicit FixedLog(std::ostream &_ostream);
@@ -412,36 +453,70 @@ class FixedLog : public Log {
   using Log::reset;
 };
 
+/// \brief Default global log for stream output
+///
+/// Initially this writes to `std::cout`, but it can be reset. Prefer using
+/// `::log()`.
+///
+/// \relates Log
 inline Log &default_log() {
   static Log log{std::cout};
   return log;
 }
 
+/// \brief Default global log for stream output of error messages
+///
+/// Initially this writes to `std::cout`, but it can be reset. Prefer using
+/// `::err_log()`.
+///
+/// \relates Log
 inline Log &default_err_log() {
   static Log log{std::cerr};
   return log;
 }
 
+/// \brief Resettable Log for stream output
+///
+/// Initially this writes to `std::cout`, but it can be reset.
+///
+/// \relates Log
 inline Log &log() { return CASM::default_log(); }
 
+/// \brief Resettable global Log for stream output of error messages
+///
+/// Initially this writes to `std::cerr`, but it can be reset.
+///
+//// \relates Log
 inline Log &err_log() { return CASM::default_err_log(); }
 
+/// \brief FixedLog to std::cout
+///
+/// \relates Log
 inline Log &cout_log() {
   static FixedLog log{std::cout};
   return log;
 }
 
+/// \brief FixedLog to std::cerr
+///
+/// \relates Log
 inline Log &cerr_log() {
   static FixedLog log{std::cerr};
   return log;
 }
 
+/// \brief FixedLog to null stream
+///
+/// \relates Log
 inline Log &null_log() {
   static std::ostream nullout{nullptr};
   static FixedLog log{nullout};
   return log;
 }
 
+/// \brief Log to a stringstream
+///
+/// \ingroup LogGroup
 class OStringStreamLog : public Log {
  public:
   /// \brief Construct a StringStreamLog
@@ -465,9 +540,14 @@ class OStringStreamLog : public Log {
   std::ostringstream m_ss;
 };
 
+/// \brief Reset where CASM::log() and CASM::err_log() direct output for the
+///     scope of this object, then revert to their previous output stream.
+///
 /// For the life of ScopedLogging CASM::log() and CASM::err_log() provide
 /// references to `new_log` and `new_err_log`, unless overridden by another
 /// ScopedLogging. The references are reverted upon destruction.
+///
+/// \ingroup LogGroup
 class ScopedLogging {
  public:
   ScopedLogging(Log &new_log, Log &new_err_log)
@@ -485,9 +565,13 @@ class ScopedLogging {
   Log m_old_err_log;
 };
 
-/// For the life of ScopedNullLogging CASM::log() and CASM::err_log() provide
+/// \brief ScopedLogging, directing output to CASM::null_log()
+///
+/// For the life of ScopedNullLogging, CASM::log() and CASM::err_log() provide
 /// references to CASM::null_log(), unless overridden by another ScopedLogging.
 /// The references are reverted upon destruction.
+///
+/// \ingroup LogGroup
 class ScopedNullLogging {
  public:
   ScopedNullLogging() : m_logging(null_log(), null_log()) {}
@@ -496,11 +580,15 @@ class ScopedNullLogging {
   ScopedLogging m_logging;
 };
 
+/// \brief ScopedLogging, directing output to a stringstream
+///
 /// For the life of ScopedStringStreamLogging CASM::log() and CASM::err_log()
 /// provide references to OStringStreamLog. The string values can be obtained
 /// from ScopedStringStreamLogging::ss() and
 /// ScopedStringStreamLogging::err_ss(). The references are reverted upon
 /// destruction.
+///
+/// \ingroup LogGroup
 class ScopedStringStreamLogging {
  public:
   /// Construct scoped StringStreamLog
@@ -526,41 +614,6 @@ class ScopedStringStreamLogging {
   OStringStreamLog m_ss_log;
   OStringStreamLog m_ss_err_log;
 };
-
-// class Logging {
-//
-// public:
-//
-//   Logging(Log &log = default_log(), Log &debug_log = default_log(), Log
-//   &err_log = default_err_log()) :
-//     m_log(&log),
-//     m_debug_log(&debug_log),
-//     m_err_log(&err_log) {
-//   }
-//
-//   Log &log() const {
-//     return *m_log;
-//   }
-//
-//   Log &debug_log() const {
-//     return *m_debug_log;
-//   }
-//
-//   Log &err_log() const {
-//     return *m_err_log;
-//   }
-//
-//   static Logging null() {
-//     return Logging(null_log(), null_log(), null_log());
-//   }
-//
-// private:
-//
-//   Log *m_log;
-//   Log *m_debug_log;
-//   Log *m_err_log;
-//
-// };
 
 }  // namespace CASM
 

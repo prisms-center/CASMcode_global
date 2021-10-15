@@ -1,4 +1,6 @@
 #include "casm/casm_io/Log.hh"
+
+#include "casm/external/MersenneTwister/MersenneTwister.h"
 #include "gtest/gtest.h"
 
 using namespace CASM;
@@ -9,6 +11,142 @@ TEST(LogTest, BasicUsage) {
 
   log() << "standard out" << std::endl;
   err_log() << "standard err" << std::endl;
+}
+
+TEST(LogTest, Paragraph0) {
+  OStringStreamLog log;
+  log.set_width(10);
+  log.paragraph("The quick brown fox jumps over the lazy dog.");
+
+  std::string expected =
+      "The quick\n"
+      "brown fox\n"
+      "jumps over\n"
+      "the lazy\n"
+      "dog.\n";
+  EXPECT_EQ(log.ss().str(), expected);
+}
+
+TEST(LogTest, Paragraph1) {
+  OStringStreamLog log;
+  log.set_width(20);
+  log.increase_indent();
+  log.paragraph("The quick brown fox jumps over the lazy dog.");
+
+  std::string expected =
+      "  The quick brown\n"
+      "  fox jumps over the\n"
+      "  lazy dog.\n";
+  EXPECT_EQ(log.ss().str(), expected);
+}
+
+TEST(LogTest, Paragraph2) {
+  OStringStreamLog log;
+  log.set_width(20);
+  log.increase_indent();
+  log.set_justification(JustificationType::Full);
+  log.paragraph("The quick brown fox jumps over the lazy dog.");
+
+  std::string expected =
+      "  The   quick  brown\n"
+      "  fox jumps over the\n"
+      "  lazy dog.\n";
+  EXPECT_EQ(log.ss().str(), expected);
+}
+
+TEST(LogTest, Paragraph3) {
+  OStringStreamLog log;
+  log.set_width(10);
+  log.set_justification(JustificationType::Right);
+  log.paragraph("The quick brown fox jumps over the lazy dog.");
+
+  std::string expected =
+      " The quick\n"
+      " brown fox\n"
+      "jumps over\n"
+      "  the lazy\n"
+      "      dog.\n";
+  EXPECT_EQ(log.ss().str(), expected);
+}
+
+TEST(LogTest, Paragraph4) {
+  OStringStreamLog log;
+  log.set_width(20);
+  log.increase_indent();
+  log.set_justification(JustificationType::Center);
+  log.paragraph("The quick brown fox jumps over the lazy dog.");
+
+  std::string expected =
+      "   The quick brown  \n"
+      "  fox jumps over the\n"
+      "      lazy dog.     \n";
+  EXPECT_EQ(log.ss().str(), expected);
+}
+
+TEST(LogTest, CalculateSection) {
+  OStringStreamLog log;
+  log.increase_indent();
+  log.calculate<Log::standard>("Formation energy");
+  log.indent() << "Using ..." << std::endl;
+
+  std::string expected =
+      "  -- Calculate: Formation energy -- \n"
+      "  Using ...\n";
+  EXPECT_EQ(log.ss().str(), expected);
+}
+
+TEST(LogTest, SectionClockExample) {
+  MTRand mtrand;
+  auto do_something = [&](long N) {
+    long sum = 0;
+    for (long i = 0; i < N; ++i) {
+      for (long j = 0; j < N; ++j) {
+        sum += mtrand.randInt();
+      }
+    }
+    return sum;
+  };
+
+  OStringStreamLog log;
+  log.show_clock();
+
+  log.calculate<Log::standard>("Something");
+  log.begin_lap();
+  log.indent() << do_something(100) << std::endl;
+  log.indent() << "DONE... took " << log.lap_time() << " s" << std::endl;
+  log << std::endl;
+
+  log.calculate<Log::standard>("Something");
+  log.begin_lap();
+  log.indent() << do_something(100) << std::endl;
+  log.indent() << "DONE... took " << log.lap_time() << " s" << std::endl;
+  log << std::endl;
+
+  log.calculate<Log::standard>("Something");
+  log.begin_lap();
+  log.indent() << do_something(100) << std::endl;
+  log.indent() << "DONE... took " << log.lap_time() << " s" << std::endl;
+  log << std::endl;
+
+  std::cout << log.ss().str() << std::endl;
+}
+
+TEST(LogTest, ClockSubsectionExample) {
+  Log log;  // default to "standard" verbosity
+  log.set_verbosity(Log::standard);
+  log << "line 1: print this at >= standard verbosity" << std::endl;
+
+  log.begin_section<Log::verbose>();
+  log << "line 2: print this at >= verbose verbosity" << std::endl;
+
+  log.begin_section<Log::standard>();
+  log << "line 3: print this at >= standard verbosity" << std::endl;
+  log.end_section();  // end "standard" section
+
+  log << "line 4: print this at >= verbose verbosity" << std::endl;
+  log.end_section();  // end "verbose" section
+
+  log << "line 5: print this at >= standard verbosity" << std::endl;
 }
 
 TEST(LogTest, Sections) {

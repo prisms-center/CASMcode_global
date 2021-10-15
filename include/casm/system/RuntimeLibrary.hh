@@ -14,6 +14,7 @@
 
 namespace CASM {
 
+/// \brief RuntimeLibrary compilation errors
 class runtime_lib_compile_error : public std::runtime_error {
  public:
   runtime_lib_compile_error(std::string _filename_base, std::string _cmd,
@@ -26,6 +27,7 @@ class runtime_lib_compile_error : public std::runtime_error {
   void print(std::ostream &sout) const;
 };
 
+/// \brief RuntimeLibrary shared object compilation errors
 class runtime_lib_shared_error : public std::runtime_error {
  public:
   runtime_lib_shared_error(std::string _filename_base, std::string _cmd,
@@ -38,12 +40,11 @@ class runtime_lib_shared_error : public std::runtime_error {
   void print(std::ostream &sout) const;
 };
 
-/// \brief Write, compile, load and use code at runtime
+/// \brief Compile, load, and use code at runtime
 class RuntimeLibrary {
  public:
   /// \brief Construct a RuntimeLibrary object, with the options to be used for
-  /// compile
-  ///        the '.o' file and the '.so' file
+  /// compiling the '.o' file and the '.so' file
   RuntimeLibrary(std::string _filename_base, std::string _compile_options,
                  std::string _so_options);
 
@@ -55,6 +56,7 @@ class RuntimeLibrary {
   /// should use extern "C". This means no member functions or overloaded
   /// functions.
   ///
+  /// See class documentation for usage.
   template <typename Signature>
   std::function<Signature> get_function(std::string function_name) const {
     std::function<Signature> func =

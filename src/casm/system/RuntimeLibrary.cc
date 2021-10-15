@@ -9,6 +9,16 @@
 
 namespace CASM {
 
+/// \defgroup System
+///
+/// \brief Helpers for running subprocesses and runtime linking
+
+/// \class runtime_lib_compile_error
+///
+/// \brief RuntimeLibrary compilation errors
+///
+/// \relates RuntimeLibrary
+
 runtime_lib_compile_error::runtime_lib_compile_error(std::string _filename_base,
                                                      std::string _cmd,
                                                      std::string _result,
@@ -24,6 +34,12 @@ void runtime_lib_compile_error::print(std::ostream &sout) const {
   sout << result << std::endl;
   sout << what() << std::endl;
 }
+
+/// \class runtime_lib_shared_error
+///
+/// \brief RuntimeLibrary shared object compilation errors
+///
+/// \relates RuntimeLibrary
 
 runtime_lib_shared_error::runtime_lib_shared_error(std::string _filename_base,
                                                    std::string _cmd,
@@ -42,9 +58,107 @@ void runtime_lib_shared_error::print(std::ostream &sout) const {
   sout << what() << std::endl;
 }
 
+/// \class RuntimeLibrary
+///
+/// \brief Compile, load, and use code at runtime
+///
+/// RuntimeLibrary encapsulates compiling, loading, and using a library at
+/// runtime. CASM generates code to evaluate cluster expansion basis functions,
+/// and utilizes RuntimeLibrary to compile and run that code. CASM also uses
+/// RuntimeLibrary for user plugins. Internally, RuntimeLibrary uses `dlopen`
+/// and `dlclose`.
+///
+/// ## Using RuntimeLibrary
+///
+/// Functions with a known name and signature can be obtained from a library
+/// using the `RuntimeLibrary::get_function` method and returned as a
+/// `std::function`. Example:
+/// \code
+/// std::shared_ptr<RuntimeLibrary> lib = ...;
+///
+/// // get the 'int add(int, int)' function
+/// std::function<int(int, int)> add = lib->get_function<int(int, int)>("add");
+/// \endcode
+///
+/// To enable runtime symbol lookup, a library should use C-style functions
+/// (i.e use `extern "C"` for functions that should be available via
+/// `RuntimeLibrary::get_function`).
+///
+/// The RuntimeLibrary must exist for the entire lifetime of functions obtained
+/// from the library. It is best to only open library once. For this reason,
+/// it is useful to store RuntimeLibrary in `std::shared_ptr`.
+///
+/// ## Constructing RuntimeLibrary
+///
+/// To construct RuntimeLibrary, the path of the source file, the compilation
+/// options, and shared object compilation options are provided. If the library
+/// is already compiled it is loaded directly, otherwise it is first compiled
+/// and then loaded. Example:
+/// \code
+/// // assumes MyLibrary has a '.cc" extension
+/// std::string filename_base = "/path/to/MyLibrary";
+///
+/// // compilation options
+/// std::string compile_options =
+///     "g++ -O3 -Wall -fPIC --std=c++17 -I/path/to/include";
+///
+/// // shared object compilation options
+/// std::string so_options = "-shared -L/path/to/lib -lcasm_global";
+///
+/// std::shared_ptr<RuntimeLibrary> lib = std::make_shared<RuntimeLibrary(
+///     filename_base, compile_options, so_options);
+/// \endcode
+///
+/// ## Configuration with environment variables
+///
+/// It may be useful to configuration the constructor options using environment
+/// variables, so RuntimeLibrary has some helper functions for checking
+/// environment variables. The following static methods return a pair of
+/// strings, the first giving the value found (or a default value) and the
+/// second giving the source of the value (i.e. which environment variable was
+/// used or the "default"), which can be useful for debugging feedback.
+///
+/// Configuration methods search priority summary:
+/// - `RuntimeLibrary::default_cxx()`:
+///   - `$CASM_CXX`,
+///   - else `$CXX`,
+///   - else default=`"g++"`
+/// - `RuntimeLibrary::default_cxxflags()`:
+///   - `$CASM_CXXFLAGS`,
+///   - else default=`"-O3 -Wall -fPIC --std=c++17"`
+/// - `RuntimeLibrary::default_soflags()`:
+///   - `$CASM_SOFLAGS`,
+///   - else default=`"-shared"`
+/// - `RuntimeLibrary::default_casm_includedir()`:
+///   - `$CASM_INCLUDEDIR`,
+///   - else `$CASM_PREFIX/include`,
+///   - else `$prefix/include`
+///     - where `$prefix` is found by searching `PATH` for the executable
+///       `ccasm` and then relative to that searching checking for `../include/
+///       casm`
+///   - else default=`"/not/found"`
+/// - `RuntimeLibrary::default_casm_libdir()`:
+///   - `$CASM_LIBDIR`,
+///   - else `$CASM_PREFIX/lib`,
+///   - else `$prefix/$librelpath`
+///     - where `$prefix` is found by searching PATH for the executable `ccasm`
+///       and then `$librelpath` is found by searching for `libcasm_global.so`
+///       or `libcasm_global.dylib` in standard locations `lib`, `lib64`, or
+///       `lib/x86_64-linux-gnu` relative to `$prefix`,
+///   - else default=`"/not/found"`
+///
+/// Additional helpful methods for constructing compilation options:
+/// - `::use_env`
+/// - `::find_executable`
+/// - `::include_path`
+/// - `::link_path`
+///
+/// \ingroup System
+
 /// \brief Construct a RuntimeLibrary object, with the options to be used for
-/// compile
-///        the '.o' file and the '.so' file
+/// compiling the '.o' file and the '.so' file
+///
+/// See class documentation for usage.
 RuntimeLibrary::RuntimeLibrary(std::string filename_base,
                                std::string compile_options,
                                std::string so_options)
@@ -85,18 +199,10 @@ RuntimeLibrary::~RuntimeLibrary() {
 
 /// \brief Compile a shared library
 ///
-/// \param _filename_base Base name for the source code file. For example,
-/// "/path/to/hello" looks for "/path/to/hello.cc",
-///        and compile "/path/to/hello.o" and "/path/to/hello.so".
-///
-/// \result Compiles file "/path/to/hello.cc" into an object file and shared
-/// library using the options
-///         provided when this RuntimeLibrary object was constructed. By
-///         default, "example.o" and "example.so".
-///
-/// To enable runtime symbol lookup use C-style functions, i.e use extern "C"
-/// for functions you want to use via get_function.  This means no member
-/// functions or overloaded functions.
+/// Compiles source file into ".o" and ".so" files. For example, if this was
+/// constructed with `_filename_base = "/path/to/MyLibrary"`, compiles
+/// "/path/to/MyLibrary.cc" into "/path/to/MyLibrary.o" and
+/// "/path/to/MyLibrary.so".
 ///
 void RuntimeLibrary::_compile() {
   // compile the source code into a dynamic library
@@ -122,7 +228,7 @@ void RuntimeLibrary::_compile() {
 
 /// \brief Load a library with a given name
 ///
-/// \param _filename_base For "hello", this loads "hello.so"
+/// For `_filename_base == "hello"`, this loads "hello.so"
 ///
 void RuntimeLibrary::_load() {
   m_handle = dlopen((m_filename_base + ".so").c_str(), RTLD_NOW);
@@ -134,8 +240,6 @@ void RuntimeLibrary::_load() {
 }
 
 /// \brief Close the current library
-///
-/// This is also done on destruction.
 void RuntimeLibrary::_close() {
   // close
   if (m_handle != nullptr) {
@@ -229,23 +333,27 @@ fs::path find_libdir(std::string executable_name, std::string lib_name) {
 
 /// \brief Return default compiler and specifying variable
 ///
-/// \returns "$CASM_CXX" if environment variable CASM_CXX exists,
-///          "$CXX" if environment variable CXX exists,
-///          otherwise "g++"
+/// \returns {"$CASM_CXX", "CASM_CXX"} if environment variable CASM_CXX exists,
+///          {"$CXX", "CXX"} if environment variable CXX exists,
+///          otherwise {"g++", "default"}
 std::pair<std::string, std::string> RuntimeLibrary::default_cxx() {
   return use_env(_cxx_env(), "g++");
 }
 
 /// \brief Default c++ compiler options
 ///
-/// \returns "-O3 -Wall -fPIC --std=c++17"
+/// \returns {"$CASM_CXXFLAGS", "CASM_CXXFLAGS"} if environment variable
+///          CASM_CXXFLAGS exists,
+///          otherwise {"-O3 -Wall -fPIC --std=c++17", "default"}
 std::pair<std::string, std::string> RuntimeLibrary::default_cxxflags() {
   return use_env(_cxxflags_env(), "-O3 -Wall -fPIC --std=c++17");
 }
 
 /// \brief Default c++ shared library options
 ///
-/// \returns "-shared"
+/// \returns {"$CASM_SOFLAGS", "CASM_SOFLAGS"} if environment variable
+///          CASM_SOFLAGS exists,
+///          otherwise {"-shared", "default"}
 std::pair<std::string, std::string> RuntimeLibrary::default_soflags() {
   return use_env(_soflags_env(), "-shared");
 }
@@ -291,7 +399,8 @@ std::pair<fs::path, std::string> RuntimeLibrary::default_casm_includedir() {
 ///     - {$CASM_PREFIX/lib, "CASM_PREFIX"} or
 ///     - {$prefix/$librelpath, "relpath"}, where using $prefix is found by
 ///       searching PATH for ccasm and $librelpath is found by searching for
-///       libcasm_global is standard locations relative to $prefix, or
+///       `libcasm_global.so` or `libcasm_global.dylib` in standard locations
+///       `lib`, `lib64`, or `lib/x86_64-linux-gnu` relative to $prefix, or
 ///     - {"/not/found", "notfound"}, if previous all fail
 ///
 std::pair<fs::path, std::string> RuntimeLibrary::default_casm_libdir() {
@@ -328,6 +437,7 @@ std::pair<fs::path, std::string> RuntimeLibrary::default_casm_libdir() {
 /// `source` is the environment value found, else "default" if no element of
 /// `var` was found
 ///
+/// \relates RuntimeLibrary
 std::pair<std::string, std::string> use_env(std::vector<std::string> var,
                                             std::string _default) {
   for (const auto &v : var) {
@@ -343,6 +453,8 @@ std::pair<std::string, std::string> use_env(std::vector<std::string> var,
 ///
 /// Notes:
 /// - Assumes PATH can be split using `:`
+///
+/// \relates RuntimeLibrary
 fs::path find_executable(std::string name) {
   char *_env = std::getenv("PATH");
 
@@ -365,6 +477,8 @@ fs::path find_executable(std::string name) {
 /// \code
 /// return dir.empty() ? "" : "-I" + dir.string();
 /// \endcode
+///
+/// \relates RuntimeLibrary
 std::string include_path(const fs::path &dir) {
   if (!dir.empty()) {
     return "-I" + dir.string();
@@ -378,6 +492,8 @@ std::string include_path(const fs::path &dir) {
 /// \code
 /// return dir.empty() ? "" : "-L" + dir.string();
 /// \endcode
+///
+/// \relates RuntimeLibrary
 std::string link_path(const fs::path &dir) {
   if (!dir.empty()) {
     return "-L" + dir.string();
