@@ -1,5 +1,5 @@
-#ifndef CASM_GLOBAL_DEFINTIONS_HH
-#define CASM_GLOBAL_DEFINTIONS_HH
+#ifndef CASM_global_filesystem
+#define CASM_global_filesystem
 
 namespace std {
 namespace filesystem {
