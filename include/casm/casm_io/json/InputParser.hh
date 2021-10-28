@@ -236,25 +236,27 @@ class InputParser : public KwargsParser {
   /// constructor not necessary
   std::unique_ptr<T> value;
 
-  /// Construct parser and use `parse(*this)`
+  /// \brief Construct parser and use
+  ///     `parse(*this, std::forward<Args>(args)...)`
   template <typename... Args>
   InputParser(jsonParser const &_input, Args &&...args);
 
-  /// Construct parser and use `parse(*this, std::forward<Args>(args)...)` if
-  /// `_path` exists
+  /// \brief Construct parser and use
+  ///     `parse(*this, std::forward<Args>(args)...)` if `_path` exists
   template <typename... Args>
   InputParser(jsonParser const &_input, fs::path _path, bool _required,
               Args &&...args);
 
-  /// Construct parser and use custom parse function, `f_parse(*this)`
-  template <typename CustomParse>
-  InputParser(CustomParse f_parse, jsonParser const &_input);
+  /// \brief Construct parser and use custom parse function,
+  ///     `f_parse(*this, std::forward<Args>(args)...)`
+  template <typename CustomParse, typename... Args>
+  InputParser(CustomParse f_parse, jsonParser const &_input, Args &&...args);
 
-  /// Construct parser and use custom parse function, `f_parse(*this)`, if
-  /// `_path` exists
-  template <typename CustomParse>
+  /// Construct parser and use custom parse function,
+  ///     `f_parse(*this, std::forward<Args>(args)...)`, if `_path` exists
+  template <typename CustomParse, typename... Args>
   InputParser(CustomParse f_parse, jsonParser const &_input, fs::path _path,
-              bool _required);
+              bool _required, Args &&...args);
 
   /// Require self.find_at(option) of type RequiredType, returning result in
   /// unique_ptr
@@ -367,6 +369,46 @@ class InputParser : public KwargsParser {
   ///
   template <typename RequiredType, typename... Args>
   std::shared_ptr<InputParser<RequiredType>> parse_as(Args &&...args);
+
+  /// Run an InputParser on the JSON subobject at this->path / option,
+  /// collecting errors and warnings
+  ///
+  /// Will:
+  /// - Subparser errors and warnings are stored using this->insert
+  ///
+  /// Equivalent to:
+  /// \code
+  /// auto subparser = std::make_shared<InputParser<RequiredType>>(
+  ///   this->input, this->relpath(option), true, std::forward<Args>(args)...);
+  /// this->insert(subparser->path, subparser);
+  /// return subparser;
+  /// \endcode
+  template <typename RequiredType, typename CustomParse, typename... Args>
+  std::shared_ptr<InputParser<RequiredType>> subparse_with(CustomParse f_parse,
+                                                           fs::path option,
+                                                           Args &&...args);
+
+  /// Subparse, if `this->path / option` exists
+  ///
+  /// If the JSON subobject does not exist, the result->value will be empty
+  template <typename RequiredType, typename CustomParse, typename... Args>
+  std::shared_ptr<InputParser<RequiredType>> subparse_if_with(
+      CustomParse f_parse, fs::path option, Args &&...args);
+
+  /// Subparse, if `this->path / option` exists, else the result->value will be
+  /// copy-constructed from `_default`
+  template <typename RequiredType, typename CustomParse, typename... Args>
+  std::shared_ptr<InputParser<RequiredType>> subparse_else_with(
+      CustomParse f_parse, fs::path option, const RequiredType &_default,
+      Args &&...args);
+
+  /// Parse `this->self` as RequiredType
+  ///
+  /// \param args Arguments forwared to the `parse` method
+  ///
+  template <typename RequiredType, typename CustomParse, typename... Args>
+  std::shared_ptr<InputParser<RequiredType>> parse_as_with(CustomParse f_parse,
+                                                           Args &&...args);
 };
 
 /// Use when the JSON document is not associated with a single resulting value

@@ -9,7 +9,7 @@
 
 namespace CASM {
 
-/// Construct parser and use `parse(*this)`
+/// \brief Construct parser and use `parse(*this, std::forward<Args>(args)...)`
 template <typename T>
 template <typename... Args>
 InputParser<T>::InputParser(jsonParser const &_input, Args &&...args)
@@ -17,8 +17,8 @@ InputParser<T>::InputParser(jsonParser const &_input, Args &&...args)
   parse(*this, std::forward<Args>(args)...);
 }
 
-/// Construct parser and use `parse(*this, std::forward<Args>(args)...)` if
-/// `_path` exists
+/// \brief Construct parser and use
+///     `parse(*this, std::forward<Args>(args)...)` if `_path` exists
 template <typename T>
 template <typename... Args>
 InputParser<T>::InputParser(jsonParser const &_input, fs::path _path,
@@ -29,23 +29,25 @@ InputParser<T>::InputParser(jsonParser const &_input, fs::path _path,
   }
 }
 
-/// Construct parser and use custom parse function, `f_parse(*this)`
+/// \brief Construct parser and use custom parse function,
+///     `f_parse(*this, std::forward<Args>(args)...)`
 template <typename T>
-template <typename CustomParse>
-InputParser<T>::InputParser(CustomParse f_parse, jsonParser const &_input)
+template <typename CustomParse, typename... Args>
+InputParser<T>::InputParser(CustomParse f_parse, jsonParser const &_input,
+                            Args &&...args)
     : KwargsParser(_input, "", true) {
-  f_parse(*this);
+  f_parse(*this, std::forward<Args>(args)...);
 }
 
-/// Construct parser and use custom parse function, `f_parse(*this)`, if `_path`
-/// exists
+/// Construct parser and use custom parse function,
+///     `f_parse(*this, std::forward<Args>(args)...)`, if `_path` exists
 template <typename T>
-template <typename CustomParse>
+template <typename CustomParse, typename... Args>
 InputParser<T>::InputParser(CustomParse f_parse, jsonParser const &_input,
-                            fs::path _path, bool _required)
+                            fs::path _path, bool _required, Args &&...args)
     : KwargsParser(_input, _path, _required) {
   if (this->exists()) {
-    f_parse(*this);
+    f_parse(*this, std::forward<Args>(args)...);
   }
 }
 
@@ -257,6 +259,58 @@ std::shared_ptr<InputParser<RequiredType>> InputParser<T>::parse_as(
     Args &&...args) {
   auto subparser = std::make_shared<InputParser<RequiredType>>(
       this->input, this->path, true, std::forward<Args>(args)...);
+  subparser->type_name = CASM::type_name<RequiredType>();
+  insert(subparser->path, subparser);
+  return subparser;
+}
+
+/// \brief Equivalent to `subparse`, but using custom parse method
+template <typename T>
+template <typename RequiredType, typename CustomParse, typename... Args>
+std::shared_ptr<InputParser<RequiredType>> InputParser<T>::subparse_with(
+    CustomParse f_parse, fs::path option, Args &&...args) {
+  auto subparser = std::make_shared<InputParser<RequiredType>>(
+      f_parse, this->input, this->relpath(option), true,
+      std::forward<Args>(args)...);
+  subparser->type_name = CASM::type_name<RequiredType>();
+  insert(subparser->path, subparser);
+  return subparser;
+}
+
+/// \brief Equivalent to `subparse_if`, but using custom parse method
+template <typename T>
+template <typename RequiredType, typename CustomParse, typename... Args>
+std::shared_ptr<InputParser<RequiredType>> InputParser<T>::subparse_if_with(
+    CustomParse f_parse, fs::path option, Args &&...args) {
+  auto subparser = std::make_shared<InputParser<RequiredType>>(
+      f_parse, this->input, this->relpath(option), false,
+      std::forward<Args>(args)...);
+  subparser->type_name = CASM::type_name<RequiredType>();
+  insert(subparser->path, subparser);
+  return subparser;
+}
+
+/// \brief Equivalent to `subparse_else`, but using custom parse method
+template <typename T>
+template <typename RequiredType, typename CustomParse, typename... Args>
+std::shared_ptr<InputParser<RequiredType>> InputParser<T>::subparse_else_with(
+    CustomParse f_parse, fs::path option, const RequiredType &_default,
+    Args &&...args) {
+  auto subparser = subparse_if_with<RequiredType>(f_parse, option,
+                                                  std::forward<Args>(args)...);
+  if (!subparser->exists()) {
+    subparser->value = notstd::make_unique<RequiredType>(_default);
+  }
+  return subparser;
+}
+
+/// \brief Equivalent to `parse_as`, but using custom parse method
+template <typename T>
+template <typename RequiredType, typename CustomParse, typename... Args>
+std::shared_ptr<InputParser<RequiredType>> InputParser<T>::parse_as_with(
+    CustomParse f_parse, Args &&...args) {
+  auto subparser = std::make_shared<InputParser<RequiredType>>(
+      f_parse, this->input, this->path, true, std::forward<Args>(args)...);
   subparser->type_name = CASM::type_name<RequiredType>();
   insert(subparser->path, subparser);
   return subparser;
