@@ -608,19 +608,19 @@ jsonParserIterator<IsConst>::jsonParserIterator(
 template <bool IsConst>
 typename jsonParserIterator<IsConst>::reference
 jsonParserIterator<IsConst>::operator*() const {
-  return (reference)*m_it;
+  return static_cast<reference>(*m_it);
 }
 
 template <bool IsConst>
 typename jsonParserIterator<IsConst>::pointer
 jsonParserIterator<IsConst>::operator->() const {
-  return (pointer) & (*m_it);
+  return static_cast<pointer>(&(*m_it));
 }
 
 template <bool IsConst>
 bool jsonParserIterator<IsConst>::operator==(
     const jsonParserIterator &iter) const {
-  return m_it == iter.m_it;
+  return parser == iter.parser && m_it == iter.m_it;
 }
 
 template <bool IsConst>
