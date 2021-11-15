@@ -296,7 +296,7 @@ CASM::jsonParser &to_json(const Eigen::MatrixBase<Derived> &value,
                           CASM::jsonParser::as_flattest) {
   if (value.rows() == 1) {
     if (value.cols() == 1) {
-      json = value(1, 1);
+      json = value(0, 0);
     } else {
       to_json(value, json, jsonParser::as_array());
     }

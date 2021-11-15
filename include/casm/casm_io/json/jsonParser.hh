@@ -490,8 +490,9 @@ class jsonParser : public nlohmann::json {
 
   /// Puts new JSON object, from iterators over a range of values of type
   /// std::pair<std::string, T>
-  template <typename Iterator>
-  jsonParser &put_obj(Iterator begin, Iterator end);
+  template <typename Iterator, typename... Args,
+            typename CASM_TMP::enable_if_iterator<Iterator>::type * = nullptr>
+  jsonParser &put_obj(Iterator begin, Iterator end, Args &&...args);
 
   /// Puts new empty JSON array
   jsonParser &put_array() { return *this = array(); }
@@ -1011,11 +1012,12 @@ jsonParser &jsonParser::put(const T &value) {
 
 /// Puts new JSON object, from iterators over a range of values of type
 /// std::pair<std::string, T>
-template <typename Iterator>
-jsonParser &jsonParser::put_obj(Iterator begin, Iterator end) {
+template <typename Iterator, typename... Args,
+          typename CASM_TMP::enable_if_iterator<Iterator>::type *>
+jsonParser &jsonParser::put_obj(Iterator begin, Iterator end, Args &&...args) {
   *this = object();
   for (auto it = begin; it != end; ++it) {
-    to_json(it->second, (*this)[it->first]);
+    to_json(it->second, (*this)[it->first], std::forward<Args>(args)...);
   }
   return *this;
 }
