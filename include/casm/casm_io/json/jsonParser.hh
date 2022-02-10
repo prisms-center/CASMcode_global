@@ -538,6 +538,12 @@ class jsonParser : public nlohmann::json {
   /// Returns an empty json array
   static jsonParser array() { return jsonParser(nlohmann::json::array()); }
 
+  /// Returns an empty json array
+  static jsonParser array(size_type N) {
+    jsonParser json;
+    return json.put_array(N, null());
+  }
+
   /// Puts new JSON array, using the same value
   template <typename T>
   static jsonParser array(size_type N, const T &t) {
