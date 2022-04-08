@@ -1,15 +1,18 @@
+#include "casm/system/RuntimeLibrary.hh"
+
 #include <filesystem>
 #include <fstream>
-#include "casm/system/RuntimeLibrary.hh"
+
 #include "autotools.hh"
 #include "gtest/gtest.h"
+#include "testdir.hh"
 
 using namespace CASM;
 
 TEST(RuntimeLibraryTest, FunctionTest) {
   EXPECT_EQ(true, true);
-  std::string cc_filename_base =
-      autotools::abs_srcdir() + "/tests/unit/system/runtime_lib";
+  test::TmpDir tmpdir;
+  std::string cc_filename_base = tmpdir.path() / "runtime_lib";
   std::filesystem::path cc_filename{cc_filename_base + ".cc"};
   EXPECT_EQ(true, true);
 
@@ -23,7 +26,7 @@ TEST(RuntimeLibraryTest, FunctionTest) {
           "   return a + b;\n"
           "}\n";
   file.close();
-  EXPECT_EQ(true, true);
+  EXPECT_TRUE(fs::exists(cc_filename)) << "does not exist: " << cc_filename;
 
   // std::string compile_opt = RuntimeLibrary::default_cxx().first + " " +
   //                           RuntimeLibrary::default_cxxflags().first;
@@ -61,7 +64,7 @@ TEST(RuntimeLibraryTest, FunctionTest) {
     // delete the library
     lib.rm();
 
-    EXPECT_EQ(true, true);
+    EXPECT_FALSE(fs::exists(cc_filename)) << "does exist: " << cc_filename;
 
   } catch (runtime_lib_compile_error &e) {
     e.print(std::cout);
