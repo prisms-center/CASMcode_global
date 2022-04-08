@@ -2,12 +2,8 @@
 #ifndef ARRAY_HH
 #define ARRAY_HH
 
-#include <stdlib.h>
-
-#include <cassert>
 #include <cmath>
 #include <iostream>
-#include <new>
 
 #include "casm/global/definitions.hh"
 #include "casm/misc/CASM_TMP.hh"

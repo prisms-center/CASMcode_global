@@ -1,6 +1,7 @@
 #ifndef CASM_misc_string_algorithm
 #define CASM_misc_string_algorithm
 
+#include <algorithm>
 #include <string>
 #include <vector>
 

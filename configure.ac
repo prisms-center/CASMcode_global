@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([CASM],
+AC_INIT([casm-global],
         m4_esyscmd([tr -d '\n' < ./casm_version.txt]),
         [casm-developers@lists.engr.ucsb.edu],
         [],
@@ -11,7 +11,6 @@ AC_CONFIG_AUX_DIR([build-aux]) #This is my doing
 AC_CONFIG_MACRO_DIR([build-aux/m4])
 #Rules to apply to every Makefile.am. Using tar-ustar due to loooooong file names (I'm looking at you Eigen)
 AM_INIT_AUTOMAKE([foreign subdir-objects 1.9 tar-ustar])
-
 
 AC_CONFIG_SRCDIR([src/casm/global])
 AC_CONFIG_HEADERS([config.h])
@@ -31,7 +30,6 @@ AC_PROG_LIBTOOL
 LT_LIB_DLLOAD
 AC_DISABLE_STATIC
 
-# AX_CXX_COMPILE_STDCXX_11
 AX_CXX_COMPILE_STDCXX_17
 
 #Require at least this version
