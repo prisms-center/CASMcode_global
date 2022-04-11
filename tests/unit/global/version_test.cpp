@@ -1,10 +1,7 @@
 #include "casm/global/version.hh"
 
 #include <regex>
-#include <vector>
 
-#include "casm/container/Array.hh"
-#include "casm/container/Counter.hh"
 #include "gtest/gtest.h"
 
 using namespace CASM;
