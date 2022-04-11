@@ -827,6 +827,12 @@ def main():
             ],
         },
         {
+            "directory": "tests/unit/global",
+            "ldadd": [
+                "libcasm_global.la"
+            ],
+        },
+        {
             "directory": "tests/unit/misc",
             "ldadd": [
                 "libcasm_global.la"
