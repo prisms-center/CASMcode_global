@@ -10,7 +10,7 @@ namespace CASM {
 class FileData {
  public:
   /// \brief Construct with path and explicit timestamp
-  FileData(std::string const &_path, std::filesystem::file_time_type _timestamp)
+  FileData(std::string const &_path, std::time_t _timestamp)
       : m_path(_path), m_timestamp(_timestamp) {}
 
   ///\brief Construct with path, timestamp is set if file exists at path
@@ -26,7 +26,7 @@ class FileData {
 
   /// \brief return stored timestamp. Timestamp corresponds to last_write_time
   /// of file timestamp defaults to 0 if file does not exist.
-  std::filesystem::file_time_type timestamp() const { return m_timestamp; }
+  std::time_t timestamp() const { return m_timestamp; }
 
   /// \brief checks timestamp of file at path. Returns true if last_write_time
   /// of file matches timestamp returns false otherwise, or if file doesn't
@@ -50,7 +50,7 @@ class FileData {
 
  private:
   std::string m_path;
-  std::filesystem::file_time_type m_timestamp;
+  std::time_t m_timestamp;
 };
 }  // namespace CASM
 #endif
