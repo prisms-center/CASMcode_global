@@ -301,6 +301,11 @@ class DataFormatter {
 
   bool initialize(const DataObject &_tmplt) const;
 
+  std::vector<notstd::cloneable_ptr<BaseDatumFormatter<DataObject> > > const &
+  formatters() const {
+    return m_data_formatters;
+  }
+
  private:
   mutable bool m_initialized;
   // List of all the ConfigFormatter objects you want outputted
