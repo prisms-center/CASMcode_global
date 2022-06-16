@@ -497,6 +497,9 @@ class jsonParser : public nlohmann::json {
   /// Puts new empty JSON array
   jsonParser &put_array() { return *this = array(); }
 
+  /// Puts new size N JSON array of null
+  jsonParser &put_array(size_type N) { return *this = array(N); }
+
   /// Puts new JSON array, using the same value
   template <typename T>
   jsonParser &put_array(size_type N, const T &t);
@@ -538,7 +541,7 @@ class jsonParser : public nlohmann::json {
   /// Returns an empty json array
   static jsonParser array() { return jsonParser(nlohmann::json::array()); }
 
-  /// Returns an empty json array
+  /// Returns a size N json array null
   static jsonParser array(size_type N) {
     jsonParser json;
     return json.put_array(N, null());
