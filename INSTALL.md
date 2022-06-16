@@ -11,9 +11,14 @@ Clone the repository:
     git clone https://github.com/bpuchala/CASMcode_global
     cd CASMcode_global
 
+Initialize submodules:
+
+    git submodule init
+    git submodule update
+
 Generate Makemodule.am files and configure script:
 
-    bash ./bootstrap.sh
+    bash bootstrap.sh
 
 Create a build folder:
 
@@ -32,7 +37,7 @@ CASM_CONFIGFLAGS="--prefix=$CASM_PREFIX "
 ../configure CXXFLAGS="${CASM_CXXFLAGS}" CC="$CASM_CC" CXX="$CASM_CXX" PYTHON="$CASM_PYTHON" ${CASM_CONFIGFLAGS}
 ```
 
-    bash ./local-configure.sh
+    bash local-configure.sh
 
 Make, check, install:
 
