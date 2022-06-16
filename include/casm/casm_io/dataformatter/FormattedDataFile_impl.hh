@@ -23,7 +23,7 @@ FormattedDataFile<DataObject>::FormattedDataFile(fs::path file_path,
       m_json_output(json_output),
       m_json_arrays(json_arrays) {
   if (!compress) {
-    m_ostream = notstd::make_unique<fs::ofstream>(file_path);
+    m_ostream = notstd::make_unique<std::ofstream>(file_path);
   } else {
     m_ostream = notstd::make_unique<gz::ogzstream>(file_path.string().c_str());
   }
