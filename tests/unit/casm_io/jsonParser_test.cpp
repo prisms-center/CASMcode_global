@@ -2,6 +2,7 @@
 
 #include <filesystem>
 
+#include "casm/casm_io/container/json_io.hh"
 #include "casm/global/filesystem.hh"
 #include "gtest/gtest.h"
 
@@ -192,4 +193,31 @@ TEST(jsonParserTest, FindDiffTest) {
 
   diff_point = find_diff(A, B, 1e-5);
   ASSERT_TRUE(diff_point.empty());
+}
+
+TEST(jsonParserTest, DumpTest) {
+  jsonParser json;
+  json["a"] = "string";
+  json["b"] = "string";
+  json["c"] = std::vector<int>({0, 1, 2, 3});
+  json["d"] = std::vector<std::vector<int>>({{0, 1, 2}, {0, 1, 2}, {0, 1, 2}});
+  json["e"] = std::vector<double>({0.0, 1.0, 2.0, 3.0});
+  json["e"][1] = std::vector<double>({0.0, 1.0, 2.0, 3.0});
+  json["ee"] = std::vector<double>({0.0, 1.0, 2.0, 3.0});
+  json["ee"][0] = std::vector<double>({0.0, 1.0, 2.0, 3.0});
+  // json["ee"].set_singleline_array();
+  json["ee"][0].set_multiline_array();
+  // json["ee"][0].unset_singleline_array();
+  json["f"] = std::vector<std::vector<double>>(
+      {{0.0, 1.0, 2.0}, {0.0, 1.0, 2.0}, {0.0, 1.0, 2.0}});
+  json["g"] = std::vector<bool>({true, false, true, false});
+  json["h"] = std::vector<std::vector<bool>>(
+      {{true, false, true}, {true, false, true}, {true, false, true}});
+  json["i"] = std::vector<std::string>({"aaa", "bbb", "ccc", "ddd"});
+  json["i"].set_multiline_array();
+  json["j"] = std::vector<std::vector<std::string>>(
+      {{"aaa", "bbb", "ccc"}, {"aaa", "bbb", "ccc"}, {"aaa", "bbb", "ccc"}});
+
+  std::cout << json << std::endl;
+  EXPECT_EQ(true, true);
 }

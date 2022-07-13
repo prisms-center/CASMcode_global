@@ -236,11 +236,11 @@ void add_to_report(jsonParser &report, KwargsParser const &parser) {
   jsonParser &parent = get_parent(report, parser);
   if (parser.warning.size()) {
     parent[parser.name() + sep + "WARNING"] = parser.warning;
-    parent[parser.name() + sep + "WARNING"].set_force_column();
+    parent[parser.name() + sep + "WARNING"].set_multiline_array();
   }
   if (parser.error.size()) {
     parent[parser.name() + sep + "ERROR"] = parser.error;
-    parent[parser.name() + sep + "ERROR"].set_force_column();
+    parent[parser.name() + sep + "ERROR"].set_multiline_array();
   }
 }
 }  // namespace make_report_impl
