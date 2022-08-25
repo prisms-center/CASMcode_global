@@ -8,9 +8,10 @@ struct jsonConstructor;
 class jsonParser;
 
 template <typename T, typename... Args>
-jsonParser &to_json(std::optional<T> const &value, jsonParser &json) {
+jsonParser &to_json(std::optional<T> const &value, jsonParser &json,
+                    Args &&...args) {
   if (value.has_value()) {
-    to_json(value.value(), json);
+    to_json(value.value(), json, std::forward<Args>(args)...);
   } else {
     json.put_null();
   }

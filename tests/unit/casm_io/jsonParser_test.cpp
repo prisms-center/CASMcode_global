@@ -3,8 +3,11 @@
 #include <filesystem>
 
 #include "casm/casm_io/container/json_io.hh"
+#include "casm/casm_io/json/InputParser_impl.hh"
 #include "casm/global/filesystem.hh"
+#include "casm/misc/CASM_math.hh"
 #include "gtest/gtest.h"
+#include "testdir.hh"
 
 using namespace CASM;
 
@@ -220,4 +223,39 @@ TEST(jsonParserTest, DumpTest) {
 
   std::cout << json << std::endl;
   EXPECT_EQ(true, true);
+}
+
+struct Example {
+  Example(double _number, std::string _string)
+      : number(_number), string(_string) {}
+  double number;
+  std::string string;
+};
+
+void parse(InputParser<Example> &parser) {
+  double number;
+  parser.require(number, "number");
+
+  std::string string;
+  parser.require(string, "string");
+
+  if (parser.valid()) {
+    parser.value = std::make_unique<Example>(number, string);
+  }
+}
+
+TEST(InputParserTest, SubparseFromFileTest) {
+  jsonParser json;
+  json["example"] = test::data_file("casm_io", "example_1.json").string();
+
+  ParentInputParser parser(json);
+  auto subparser = parser.subparse_from_file<Example>("example");
+
+  EXPECT_EQ(parser.valid(), true);
+  EXPECT_EQ(subparser->valid(), true);
+  EXPECT_EQ(CASM::almost_equal(subparser->value->number, 12.2), true);
+  EXPECT_EQ(subparser->value->string, "abc");
+
+  std::cout << "number: " << subparser->value->number << std::endl;
+  std::cout << "string: " << subparser->value->string << std::endl;
 }

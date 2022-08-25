@@ -402,6 +402,12 @@ class InputParser : public KwargsParser {
       CustomParse f_parse, fs::path option, const RequiredType &_default,
       Args &&...args);
 
+  /// Run an InputParser on the JSON file with path given by the option,
+  ///     collecting errors and warnings
+  template <typename RequiredType, typename... Args>
+  std::shared_ptr<InputParser<RequiredType>> subparse_from_file(fs::path option,
+                                                                Args &&...args);
+
   /// Parse `this->self` as RequiredType
   ///
   /// \param args Arguments forwared to the `parse` method

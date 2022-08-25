@@ -304,6 +304,28 @@ std::shared_ptr<InputParser<RequiredType>> InputParser<T>::subparse_else_with(
   return subparser;
 }
 
+/// Run an InputParser on the JSON file with path given by the option,
+///     collecting errors and warnings
+template <typename T>
+template <typename RequiredType, typename... Args>
+std::shared_ptr<InputParser<RequiredType>> InputParser<T>::subparse_from_file(
+    fs::path option, Args &&...args) {
+  std::string filepath;
+  require(filepath, option);
+  if (!fs::exists(filepath)) {
+    insert_error(option, "Error: file does not exist.");
+    jsonParser json;
+    return std::make_shared<InputParser<RequiredType>>(
+        json, std::forward<Args>(args)...);
+  }
+  jsonParser json{fs::path(filepath)};
+  auto subparser = std::make_shared<InputParser<RequiredType>>(
+      json, std::forward<Args>(args)...);
+  subparser->type_name = CASM::type_name<RequiredType>();
+  insert(this->relpath(option), subparser);
+  return subparser;
+}
+
 /// \brief Equivalent to `parse_as`, but using custom parse method
 template <typename T>
 template <typename RequiredType, typename CustomParse, typename... Args>
