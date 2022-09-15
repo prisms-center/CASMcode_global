@@ -111,7 +111,7 @@ std::unique_ptr<RequiredType> InputParser<T>::optional(fs::path option,
     ptr = &self;
   } else {
     auto it = self.find_at(option);
-    if (it == self.end()) {
+    if (it == self.end() || it->is_null()) {
       return std::unique_ptr<RequiredType>();
     } else {
       ptr = &(*it);
@@ -139,7 +139,7 @@ void InputParser<T>::optional(RequiredType &value, fs::path option,
     ptr = &self;
   } else {
     auto it = self.find_at(option);
-    if (it == self.end()) {
+    if (it == self.end() || it->is_null()) {
       return;
     } else {
       ptr = &(*it);
@@ -169,7 +169,7 @@ RequiredType InputParser<T>::optional_else(fs::path option,
     ptr = &self;
   } else {
     auto it = self.find_at(option);
-    if (it == self.end()) {
+    if (it == self.end() || it->is_null()) {
       return _default;
     } else {
       ptr = &(*it);
@@ -198,7 +198,7 @@ void InputParser<T>::optional_else(RequiredType &value, fs::path option,
     ptr = &self;
   } else {
     auto it = self.find_at(option);
-    if (it == self.end()) {
+    if (it == self.end() || it->is_null()) {
       value = _default;
       return;
     } else {
@@ -247,7 +247,7 @@ std::shared_ptr<InputParser<RequiredType>> InputParser<T>::subparse_else(
     fs::path option, const RequiredType &_default, Args &&...args) {
   auto subparser =
       subparse_if<RequiredType>(option, std::forward<Args>(args)...);
-  if (!subparser->exists()) {
+  if (!subparser->exists() || subparser->self.is_null()) {
     subparser->value = notstd::make_unique<RequiredType>(_default);
   }
   return subparser;
@@ -298,7 +298,7 @@ std::shared_ptr<InputParser<RequiredType>> InputParser<T>::subparse_else_with(
     Args &&...args) {
   auto subparser = subparse_if_with<RequiredType>(f_parse, option,
                                                   std::forward<Args>(args)...);
-  if (!subparser->exists()) {
+  if (!subparser->exists() || subparser->self.is_null()) {
     subparser->value = notstd::make_unique<RequiredType>(_default);
   }
   return subparser;

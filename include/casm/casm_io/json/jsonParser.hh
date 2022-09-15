@@ -53,18 +53,13 @@ class jsonParserIterator;
 ///
 /// \code
 /// // read from file
-/// fs::path path = "myfile.json";
-/// jsonParser json(path);
+/// jsonParser json;
+/// json.read("myfile.json");
 /// \endcode
 ///
 /// \code
 /// // read from file
-/// jsonFile json("myfile.json");
-/// \endcode
-///
-/// \code
-/// // read from file
-/// jsonParser json = jsonParser::read("myfile.json");
+/// jsonFile json(fs::path("myfile.json"));
 /// \endcode
 ///
 /// \code
@@ -263,10 +258,10 @@ class jsonParser : public nlohmann::json {
   // ---- Read/Print JSON  ----------------------------------
 
   /// Reads json from the stream
-  bool read(std::istream &stream);
+  void read(std::istream &stream);
 
   /// Reads json from a path
-  bool read(const fs::path &mypath);
+  void read(const fs::path &mypath);
 
   /// Print json to stream
   void print(std::ostream &stream, unsigned int indent = 2,
@@ -626,10 +621,14 @@ void from_json(fs::path &value, const jsonParser &json);
 
 /// Create a jsonParser from a stream
 inline void to_json(std::istream &stream, jsonParser &json) {
-  if (!json.read(stream)) {
-    throw std::runtime_error(
-        std::string("ERROR: Could not read JSON. Please check your formatting. "
-                    "For instance, try http://www.jsoneditoronline.org."));
+  try {
+    json.read(stream);
+  } catch (std::exception &e) {
+    std::stringstream msg;
+    msg << e.what() << std::endl;
+    msg << "ERROR: Could not read JSON. Please check your formatting. For "
+           "instance, try http://www.jsoneditoronline.org.";
+    throw std::runtime_error(msg.str());
   }
 }
 
@@ -648,12 +647,7 @@ jsonParser &to_json(const std::complex<T> &value, jsonParser &json) {
 /// From JSON for complex
 template <typename T>
 void from_json(std::complex<T> &value, const jsonParser &json) {
-  try {
-    value = std::complex<T>(json["real"].get<T>(), json["imag"].get<T>());
-  } catch (...) {
-    /// re-throw exceptions
-    throw;
-  }
+  value = std::complex<T>(json["real"].get<T>(), json["imag"].get<T>());
 }
 
 /// To JSON for std::pair<std::string, T>
@@ -801,14 +795,9 @@ class jsonParserIterator {
 /// to_json( const T &value, jsonParser &json)' is defined
 template <typename T, typename... Args>
 jsonParser &jsonParser::push_back(const T &value, Args &&...args) {
-  try {
-    jsonParser json;
-    self().push_back(to_json(value, json, std::forward<Args>(args)...));
-    return *this;
-  } catch (...) {
-    /// re-throw exceptions
-    throw;
-  }
+  jsonParser json;
+  self().push_back(to_json(value, json, std::forward<Args>(args)...));
+  return *this;
 }
 
 /// Get data from json, using one of several alternatives

@@ -68,11 +68,21 @@ jsonParser &to_json(const jsonParser &value, jsonParser &json) {
 /// JSON. Use 'to_json(file_path.string(), json)' if you only want the path as a
 /// string
 void to_json(fs::path file_path, jsonParser &json) {
-  if (!json.read(file_path)) {
-    throw std::runtime_error(std::string("ERROR: Could not read JSON file: '") +
-                             file_path.string() +
-                             "'.\n\nPlease check your formatting. For "
-                             "instance, try http://www.jsoneditoronline.org.");
+  if (!fs::exists(file_path)) {
+    std::stringstream msg;
+    msg << "file does not exist: " << file_path;
+    throw std::runtime_error(msg.str());
+  }
+  try {
+    json.read(file_path);
+  } catch (std::exception &e) {
+    std::stringstream msg;
+    msg << std::endl;
+    msg << "ERROR: Could not parse JSON file: " << file_path << std::endl;
+    msg << e.what() << std::endl;
+    msg << "Please check your formatting. For "
+           "instance, try http://www.jsoneditoronline.org.";
+    throw std::runtime_error(msg.str());
   }
 }
 
@@ -168,22 +178,29 @@ void from_json(fs::path &value, const jsonParser &json) {
 
 // ---- Read/Print JSON  ----------------------------------
 
-bool jsonParser::read(std::istream &stream) {
-  stream >> self();
-  return true;  // TODO: check this? should throw for errors
-}
+void jsonParser::read(std::istream &stream) { stream >> self(); }
 
-bool jsonParser::read(const fs::path &file_path) {
+void jsonParser::read(const fs::path &file_path) {
+  if (!fs::exists(file_path)) {
+    std::stringstream msg;
+    msg << "file does not exist: " << file_path;
+    throw std::runtime_error(msg.str());
+  }
   std::ifstream stream(file_path);
-  return read(stream);
+  read(stream);
 }
 
 std::istream &operator>>(std::istream &stream, jsonParser &json) {
-  if (!json.read(stream)) {
+  try {
+    json.read(stream);
+  } catch (std::exception &e) {
     std::stringstream msg;
-    msg << "Error: Unable to successfully parse JSON file.  File parsed as:\n"
-        << json << "\nPlease correct input file and try again. Exiting...\n";
-    throw std::invalid_argument(msg.str());
+    msg << std::endl;
+    msg << "ERROR: Could not parse JSON" << std::endl;
+    msg << e.what() << std::endl;
+    msg << "Please check your formatting. For instance, try "
+           "http://www.jsoneditoronline.org.";
+    throw std::runtime_error(msg.str());
   }
   return stream;
 }
