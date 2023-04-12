@@ -28,13 +28,14 @@ Configure to generate a Makefile. An example local-configure.sh script for build
 ```
 CASM_PREFIX=$CONDA_PREFIX
 
-CASM_CXXFLAGS="-O3 -Wall -DNDEBUG -fcolor-diagnostics"
+CASM_CXXFLAGS="-O3 -Wall -DNDEBUG -I${CASM_PREFIX}/include"
 CASM_CC="ccache cc"
 CASM_CXX="ccache c++"
 CASM_PYTHON="python"
+CASM_LDFLAGS="-L$CASM_PREFIX/lib"
 CASM_CONFIGFLAGS="--prefix=$CASM_PREFIX "
 
-../configure CXXFLAGS="${CASM_CXXFLAGS}" CC="$CASM_CC" CXX="$CASM_CXX" PYTHON="$CASM_PYTHON" ${CASM_CONFIGFLAGS}
+../configure CXXFLAGS="${CASM_CXXFLAGS}" CC="${CASM_CC}" CXX="${CASM_CXX}" PYTHON="${CASM_PYTHON}" LDFLAGS="${CASM_LDFLAGS}" ${CASM_CONFIGFLAGS}
 ```
 
     bash local-configure.sh
@@ -44,3 +45,23 @@ Make, check, install:
     make
     make check
     make install
+
+
+Make and check a source distribution
+------------------------------------
+
+An example run_distcheck.sh script to build and check a source distribution in the current conda environment could look like:
+```
+CASM_PREFIX=$CONDA_PREFIX
+
+CASM_CXXFLAGS="-O3 -Wall -DNDEBUG -I${CASM_PREFIX}/include"
+CASM_CC="ccache cc"
+CASM_CXX="ccache c++"
+CASM_PYTHON="python"
+CASM_LDFLAGS="-L$CASM_PREFIX/lib"
+
+export DISTCHECK_CONFIGURE_FLAGS=" CXXFLAGS=\"${CASM_CXXFLAGS}\" CC=\"${CASM_CC}\" CXX=\"${CASM_CXX}\" PYTHON=\"${CASM_PYTHON}\" LDFLAGS=\"${CASM_LDFLAGS}\""
+make distcheck -j8
+```
+
+    bash run_distcheck.sh
