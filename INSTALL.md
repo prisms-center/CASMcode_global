@@ -3,7 +3,7 @@ Build and install
 
 Get the necessary build tools: autotools, git, python=3, gitpython, etc. As a conda environment, this could be:
 
-    conda create -n casm_v2 --override-channels -c conda-forge python=3 m4>=1.4.18 autoconf automake make libtool pkg-config ccache wget bzip2 six git gitpython
+    conda create -n casm_v2 --override-channels -c conda-forge python=3 m4>=1.4.18 autoconf autoconf-archive automake make libtool pkg-config ccache wget bzip2 six git gitpython
     conda activate casm_v2
 
 Clone the repository:
