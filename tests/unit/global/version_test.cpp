@@ -18,14 +18,14 @@ TEST(VersionTest, Test1) {
   std::regex_match(CASM::version(), v_match, test::semver_regex());
 
   // Use <major> "." <minor> "." <patch>
-  // or <major> "." <minor> "." <patch> "-" <pre-release> using "alpha",
+  // or <major> "." <minor> "." <patch> "-" <pre-release> using "alpha.1",
   // "beta.1", "beta.2", ...
   EXPECT_EQ(v_match.size(), 6);
   EXPECT_EQ(v_match[1].str(), "2");
   EXPECT_EQ(v_match[2].str(), "0");
   EXPECT_EQ(v_match[3].str(), "0");
-  EXPECT_EQ(v_match[4].str(), "alpha");
+  EXPECT_EQ(v_match[4].str(), "alpha.1");
 
-  EXPECT_EQ(CASM::version(), "2.0.0-alpha");
+  EXPECT_EQ(CASM::version(), "2.0.0-alpha.1");
   EXPECT_EQ(CASM::version(), casm_global_version());
 }
