@@ -1,0 +1,17 @@
+name: casm_v2
+channels:
+  - conda-forge
+dependencies:
+  - python =3
+  - m4 >=1.4.18
+  - autoconf
+  - automake
+  - make
+  - libtool
+  - pkg-config
+  - ccache
+  - wget
+  - bzip2
+  - six
+  - git
+  - gitpython

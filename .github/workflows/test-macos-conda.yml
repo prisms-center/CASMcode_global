@@ -1,0 +1,77 @@
+name: Testing with conda on macos-latest
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: macOS-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v3
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: casm_v2
+          environment-file: conda/environment.yml
+
+      - name: Conda info
+        shell: bash -el {0}
+        run: |
+          conda info
+          conda list
+
+      - name: cache casm build
+        id: cache-build
+        uses: actions/cache@v3
+        with:
+          path: build
+          key: ${{ runner.os }}-build
+
+      - name: cache ccache
+        id: cache-ccache
+        uses: actions/cache@v3
+        with:
+          path: ~/.ccache
+          key: ${{ runner.os }}-ccache
+
+      - name: mkdir build
+        shell: bash -el {0}
+        if: steps.cache-build.outputs.cache-hit != 'true'
+        run: |
+          mkdir build
+
+      - name: make
+        shell: bash -el {0}
+        run: |
+          git submodule update --init --recursive
+          bash bootstrap.sh
+          cd build
+          ../configure CC='ccache cc' CXX='ccache c++' CXXFLAGS='-O3 -Wall -DNDEBUG'
+          make -j4
+
+      - name: make check
+        shell: bash -el {0}
+        run: |
+          cd build
+          make check -j4
+
+      - name: upload test log
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-log
+          path: build/test-suite.log
+
+      - name: make distcheck
+        shell: bash -el {0}
+        run: |
+          mkdir build_distcheck && cd build_distcheck
+          ../configure CC='ccache cc' CXX='ccache c++' CXXFLAGS='-O3 -Wall -DNDEBUG'
+          export DISTCHECK_CONFIGURE_FLAGS=" CC='ccache cc' CXX='ccache c++' CXXFLAGS='-O3 -Wall -DNDEBUG' "
+          make distcheck -j4
+
+      - name: upload tarball
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: casm-global-targz
+          path: build_distcheck/casm-global-*.tar.gz
