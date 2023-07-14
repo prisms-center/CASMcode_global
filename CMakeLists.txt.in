@@ -1,0 +1,60 @@
+cmake_minimum_required(VERSION 3.20)
+
+project(CASMcode_global VERSION 2.0.0 LANGUAGES CXX)
+
+# specify the C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+##############################################
+## Find dependencies
+
+# Should find ZLIB::ZLIB
+find_package(ZLIB)
+
+##############################################
+## Build libcasm_global
+
+# create libcasm_global
+set(
+  libcasm_global_HEADERS
+@header_files@)
+set(
+  libcasm_global_SOURCES
+@source_files@)
+add_library(casm_global SHARED ${libcasm_global_SOURCES})
+target_include_directories(casm_global
+  PUBLIC
+    $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:include/casm/external/gzstream>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/casm/external/gzstream>
+)
+target_compile_options(casm_global
+  PUBLIC
+    "-DTXT_VERSION=\"${CMAKE_PROJECT_VERSION}\""
+    -DEIGEN_DEFAULT_DENSE_INDEX_TYPE=long
+    -DGZSTREAM_NAMESPACE=gz
+)
+target_link_libraries(casm_global
+  ZLIB::ZLIB
+)
+
+
+##############################################
+## Install libcasm_global
+
+# install header files
+foreach ( file ${libcasm_global_HEADERS} )
+  get_filename_component( dir ${file} DIRECTORY )
+  install( FILES ${file} DESTINATION ${dir} )
+endforeach()
+
+# install libcasm_global
+install(TARGETS casm_global DESTINATION lib)
+
+
+##############################################
+## Add test
+enable_testing()
+add_subdirectory(tests)
