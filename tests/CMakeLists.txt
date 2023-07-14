@@ -35,8 +35,8 @@ endif()
 # create libcasm_testing
 set(
   libcasm_testing_SOURCES
-  unit/autotools.cc
-  unit/testdir.cc
+  ${PROJECT_SOURCE_DIR}/unit/autotools.cc
+  ${PROJECT_SOURCE_DIR}/unit/testdir.cc
 )
 add_library(casm_testing SHARED ${libcasm_testing_SOURCES})
 target_include_directories(casm_testing
@@ -55,11 +55,11 @@ target_compile_options(casm_testing
 ################################################################
 # casm_unit_casm_io
 add_executable(casm_unit_casm_io
-  unit/gtest_main_run_all.cpp
-  unit/casm_io/DataFormatter_test.cpp
-  unit/casm_io/EnumIO_test.cpp
-  unit/casm_io/Log_test.cpp
-  unit/casm_io/jsonParser_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
+  ${PROJECT_SOURCE_DIR}/unit/casm_io/DataFormatter_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/casm_io/EnumIO_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/casm_io/Log_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/casm_io/jsonParser_test.cpp
 )
 target_compile_features(casm_unit_casm_io PRIVATE cxx_auto_type)
 target_link_libraries(casm_unit_casm_io
@@ -77,8 +77,8 @@ add_test(NAME casm_unit_casm_io COMMAND casm_unit_casm_io)
 ################################################################
 # casm_unit_container
 add_executable(casm_unit_container
-  unit/gtest_main_run_all.cpp
-  unit/container/Counter_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
+  ${PROJECT_SOURCE_DIR}/unit/container/Counter_test.cpp
 )
 target_compile_features(casm_unit_container PRIVATE cxx_auto_type)
 target_link_libraries(casm_unit_container
@@ -95,8 +95,8 @@ add_test(NAME casm_unit_container COMMAND casm_unit_container)
 ################################################################
 # casm_unit_global
 add_executable(casm_unit_global
-  unit/gtest_main_run_all.cpp
-  unit/global/version_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
+  ${PROJECT_SOURCE_DIR}/unit/global/version_test.cpp
 )
 target_compile_features(casm_unit_global PRIVATE cxx_auto_type)
 target_link_libraries(casm_unit_global
@@ -113,9 +113,9 @@ add_test(NAME casm_unit_global COMMAND casm_unit_global)
 ################################################################
 # casm_unit_misc
 add_executable(casm_unit_misc
-  unit/gtest_main_run_all.cpp
-  unit/misc/string_algorithm_test.cpp
-  unit/misc/cloneable_ptr_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
+  ${PROJECT_SOURCE_DIR}/unit/misc/string_algorithm_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/misc/cloneable_ptr_test.cpp
 )
 target_compile_features(casm_unit_misc PRIVATE cxx_auto_type)
 target_link_libraries(casm_unit_misc
@@ -132,8 +132,8 @@ add_test(NAME casm_unit_misc COMMAND casm_unit_misc)
 ################################################################
 # casm_unit_system
 add_executable(casm_unit_system
-  unit/gtest_main_run_all.cpp
-  unit/system/RuntimeLibrary_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
+  ${PROJECT_SOURCE_DIR}/unit/system/RuntimeLibrary_test.cpp
 )
 target_compile_features(casm_unit_system PRIVATE cxx_auto_type)
 target_link_libraries(casm_unit_system

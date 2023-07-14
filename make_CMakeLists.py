@@ -188,7 +188,7 @@ def unit_test_source_files(search_dir, relative_to, additional):
 def as_cmake_file_strings(files):
     cmake_file_strings = ""
     for file in files:
-        cmake_file_strings += "  " + str(file) + "\n"
+        cmake_file_strings += "  ${PROJECT_SOURCE_DIR}/" + str(file) + "\n"
     return cmake_file_strings
 
 ### make CMakeLists.txt from CMakeLists.txt.in ###
