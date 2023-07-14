@@ -1,4 +1,4 @@
-name: Testing on ubuntu-latest
+name: Testing on macos-latest
 
 on: [push, pull_request]
 
