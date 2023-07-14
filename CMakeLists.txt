@@ -523,14 +523,6 @@ install(
   EXPORT CASMcode_globalTargets
   DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-
-##############################################
-## Add test
-# TODO: fix failing googletest build
-# enable_testing()
-# add_subdirectory(tests)
-
-
 ##############################################
 ## Python extensions
 
@@ -546,6 +538,16 @@ install(
 # will allow `find_package` to find this package and any other package installed
 # via a Python package if the CMake and Python packages are named the same.
 set(CASM_GLOBAL_CMAKE_PACKAGE_INSTALL_SUBDIR "share/CASMcode_global/cmake")
+
+# configure and install libcasm.casmglobal.__main__.py
+# this allows getting configuration information of the installed package using:
+# - python -m libcasm.casmglobal --cmakelists
+# - python -m libcasm.casmglobal --prefix
+configure_file("${PROJECT_SOURCE_DIR}/python/libcasm/casmglobal/__main__.py.in"
+  "${PROJECT_BINARY_DIR}/python/libcasm/casmglobal/__main__.py")
+install(
+  FILES "${PROJECT_BINARY_DIR}/python/libcasm/casmglobal/__main__.py"
+  DESTINATION casmglobal)
 
 install(
   EXPORT CASMcode_globalTargets
@@ -616,3 +618,10 @@ if(DEFINED SKBUILD)
   endif()
 
 endif()
+
+
+##############################################
+## Add tests
+# TODO: fix failing googletest build
+# enable_testing()
+# add_subdirectory(tests)
