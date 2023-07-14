@@ -12,65 +12,36 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Set up requirements
+      - name: Set up requirements & configuration variables
         run: |
           sudo apt-get update
-          sudo apt-get install build-essential autoconf ccache
+          sudo apt-get install build-essential cmake
           pip install --upgrade pip wheel
-          pip install GitPython
+          git submodule update --init --recursive
+          echo "CASM_PREFIX=${CASM_PREFIX}" >> "$GITHUB_ENV"
 
-      - name: cache casm build
-        id: cache-build
-        uses: actions/cache@v3
-        with:
-          path: build
-          key: ${{ runner.os }}-build
-
-      - name: cache ccache
-        id: cache-ccache
-        uses: actions/cache@v3
-        with:
-          path: ~/.ccache
-          key: ${{ runner.os }}-ccache
-
-      - name: mkdir build
+      - name: configure
         shell: bash
-        if: steps.cache-build.outputs.cache-hit != 'true'
-        run: mkdir build
+        run: |
+          mkdir -p build
+          cd build
+          cmake ..
 
       - name: make
         shell: bash
         run: |
-          git submodule update --init --recursive
-          bash bootstrap.sh
           cd build
-          ../configure CC='ccache gcc' CXX='ccache g++' CXXFLAGS='-O3 -Wall -DNDEBUG'
-          make -j4
+          make -j4 VERBOSE=1
 
-      - name: make check
+      - name: make test
         shell: bash
         run: |
           cd build
-          make check -j4
+          make -j4 test
 
       - name: upload test log
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: test-log
-          path: build/test-suite.log
-
-      - name: make distcheck
-        shell: bash
-        run: |
-          mkdir build_distcheck && cd build_distcheck
-          ../configure CC='ccache gcc' CXX='ccache g++' CXXFLAGS='-O3 -Wall -DNDEBUG'
-          export DISTCHECK_CONFIGURE_FLAGS=" CC='ccache gcc' CXX='ccache g++' CXXFLAGS='-O3 -Wall -DNDEBUG' "
-          make distcheck -j4
-
-      - name: upload tarball
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: casm-global-targz
-          path: build_distcheck/casm-global-*.tar.gz
+          path: build/Testing/Temporary/LastTest.log
