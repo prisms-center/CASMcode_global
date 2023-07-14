@@ -58,6 +58,36 @@ set(
   ${PROJECT_SOURCE_DIR}/include/casm/system/RuntimeLibrary.hh
   ${PROJECT_SOURCE_DIR}/include/casm/external/MersenneTwister/MersenneTwister.h
   ${PROJECT_SOURCE_DIR}/include/casm/external/pybind11_json/pybind11_json.hpp
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/CholmodSupport
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/StdVector
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/StdDeque
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/Core
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/SparseLU
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/OrderingMethods
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/QtAlignedMalloc
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/Householder
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/PardisoSupport
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/SparseCore
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/Jacobi
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/Dense
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/SPQRSupport
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/QR
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/Eigen
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/SparseQR
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/SVD
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/Cholesky
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/UmfPackSupport
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/IterativeLinearSolvers
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/LU
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/Sparse
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/Geometry
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/SuperLUSupport
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/StdList
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/MetisSupport
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/SparseCholesky
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/Eigenvalues
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/PaStiXSupport
+  ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/KLUSupport
   ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/src/CholmodSupport/InternalHeaderCheck.h
   ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/src/CholmodSupport/CholmodSupport.h
   ${PROJECT_SOURCE_DIR}/include/casm/external/Eigen/src/misc/blas.h
@@ -479,7 +509,7 @@ target_link_libraries(casm_global
 ##############################################
 ## Install libcasm_global
 
-# install header files in <prefix>/libcasm/casmglobal/include/,
+# install header files in <prefix>/libcasm/include/,
 # while preserving directory structure
 foreach ( filevar ${libcasm_global_HEADERS} )
   file(RELATIVE_PATH relfile ${PROJECT_SOURCE_DIR}/include/ ${filevar})
@@ -487,7 +517,7 @@ foreach ( filevar ${libcasm_global_HEADERS} )
   install( FILES ${filevar} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${reldir} )
 endforeach()
 
-# install libcasm_global in <prefix>/libcasm/casmglobal/lib/
+# install libcasm_global in <prefix>/libcasm/lib/
 install(
   TARGETS casm_global
   EXPORT CASMcode_globalTargets
@@ -563,7 +593,7 @@ if(DEFINED SKBUILD)
   pybind11_add_module(_casmglobal MODULE
                       "${PROJECT_SOURCE_DIR}/python/src/casmglobal.cpp")
   target_link_libraries(_casmglobal PRIVATE casm_global)
-  install(TARGETS _casmglobal DESTINATION .)
+  install(TARGETS _casmglobal DESTINATION casmglobal)
   if(APPLE)
     set_target_properties(
       _casmglobal PROPERTIES INSTALL_RPATH "@loader_path/${CMAKE_INSTALL_LIBDIR}")
@@ -573,16 +603,16 @@ if(DEFINED SKBUILD)
   endif()
 
   ### libcasm.container._container ###
-  #pybind11_add_module(_container MODULE
-  #                    "${PROJECT_SOURCE_DIR}/python/src/container.cpp")
-  #target_link_libraries(_container PRIVATE casm_global)
-  #install(TARGETS _container DESTINATION .)
-  #if(APPLE)
-  #  set_target_properties(
-  #    _container PROPERTIES INSTALL_RPATH "@loader_path/${CMAKE_INSTALL_LIBDIR}")
-  #else()
-  #  set_target_properties(
-  #    _container PROPERTIES INSTALL_RPATH "$ORIGIN/${CMAKE_INSTALL_LIBDIR}")
-  #endif()
+  pybind11_add_module(_container MODULE
+                      "${PROJECT_SOURCE_DIR}/python/src/container.cpp")
+  target_link_libraries(_container PRIVATE casm_global)
+  install(TARGETS _container DESTINATION container)
+  if(APPLE)
+    set_target_properties(
+      _container PROPERTIES INSTALL_RPATH "@loader_path/${CMAKE_INSTALL_LIBDIR}")
+  else()
+    set_target_properties(
+      _container PROPERTIES INSTALL_RPATH "$ORIGIN/${CMAKE_INSTALL_LIBDIR}")
+  endif()
 
 endif()

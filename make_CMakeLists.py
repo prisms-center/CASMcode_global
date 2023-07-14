@@ -147,13 +147,17 @@ def purge_untracked_files(file_list):
 
 
 def header_files(search_root):
-    files = [
+    files_by_dir = [
         (dirpath, files)
         for dirpath, dirnames, files in os.walk(search_root, followlinks=True)
     ]
+    files = [
+        os.path.join(dirpath, file)
+        for dirpath, files in files_by_dir for file in files
+    ]
     _header_files = [
-        os.path.join(d, f) for d, fs in files for f in fs
-        if is_extensionless_Eigen_header(f) or has_header_extension(f)
+        file for file in files
+        if is_extensionless_Eigen_header(file) or has_header_extension(file)
     ]
     return _header_files
 

@@ -49,7 +49,7 @@ target_link_libraries(casm_global
 ##############################################
 ## Install libcasm_global
 
-# install header files in <prefix>/libcasm/casmglobal/include/,
+# install header files in <prefix>/libcasm/include/,
 # while preserving directory structure
 foreach ( filevar ${libcasm_global_HEADERS} )
   file(RELATIVE_PATH relfile ${PROJECT_SOURCE_DIR}/include/ ${filevar})
@@ -57,7 +57,7 @@ foreach ( filevar ${libcasm_global_HEADERS} )
   install( FILES ${filevar} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${reldir} )
 endforeach()
 
-# install libcasm_global in <prefix>/libcasm/casmglobal/lib/
+# install libcasm_global in <prefix>/libcasm/lib/
 install(
   TARGETS casm_global
   EXPORT CASMcode_globalTargets
@@ -133,7 +133,7 @@ if(DEFINED SKBUILD)
   pybind11_add_module(_casmglobal MODULE
                       "${PROJECT_SOURCE_DIR}/python/src/casmglobal.cpp")
   target_link_libraries(_casmglobal PRIVATE casm_global)
-  install(TARGETS _casmglobal DESTINATION .)
+  install(TARGETS _casmglobal DESTINATION casmglobal)
   if(APPLE)
     set_target_properties(
       _casmglobal PROPERTIES INSTALL_RPATH "@loader_path/${CMAKE_INSTALL_LIBDIR}")
@@ -143,16 +143,16 @@ if(DEFINED SKBUILD)
   endif()
 
   ### libcasm.container._container ###
-  #pybind11_add_module(_container MODULE
-  #                    "${PROJECT_SOURCE_DIR}/python/src/container.cpp")
-  #target_link_libraries(_container PRIVATE casm_global)
-  #install(TARGETS _container DESTINATION .)
-  #if(APPLE)
-  #  set_target_properties(
-  #    _container PROPERTIES INSTALL_RPATH "@loader_path/${CMAKE_INSTALL_LIBDIR}")
-  #else()
-  #  set_target_properties(
-  #    _container PROPERTIES INSTALL_RPATH "$ORIGIN/${CMAKE_INSTALL_LIBDIR}")
-  #endif()
+  pybind11_add_module(_container MODULE
+                      "${PROJECT_SOURCE_DIR}/python/src/container.cpp")
+  target_link_libraries(_container PRIVATE casm_global)
+  install(TARGETS _container DESTINATION container)
+  if(APPLE)
+    set_target_properties(
+      _container PROPERTIES INSTALL_RPATH "@loader_path/${CMAKE_INSTALL_LIBDIR}")
+  else()
+    set_target_properties(
+      _container PROPERTIES INSTALL_RPATH "$ORIGIN/${CMAKE_INSTALL_LIBDIR}")
+  endif()
 
 endif()
