@@ -628,6 +628,5 @@ endif()
 
 ##############################################
 ## Add tests
-# TODO: fix failing googletest build
 enable_testing()
 add_subdirectory(tests)
