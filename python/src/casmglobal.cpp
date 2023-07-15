@@ -4,6 +4,7 @@
 #include <pybind11/stl.h>
 
 #include <fstream>
+#include <iostream>
 
 // nlohmann::json binding
 #define JSON_USE_IMPLICIT_CONVERSIONS 0
@@ -11,6 +12,7 @@
 
 // CASM
 #include "casm/global/definitions.hh"
+#include "casm/global/version.hh"
 
 #define STRINGIFY(x) #x
 #define MACRO_STRINGIFY(x) STRINGIFY(x)
@@ -47,27 +49,6 @@ PYBIND11_MODULE(_casmglobal, m) {
 
   // Planck's Constant
   m.attr("PLANCK") = PLANCK;
-
-  // Test function
-  m.def(
-      "add", [](double a, double b) { return a + b; }, py::arg("a"),
-      py::arg("b"),
-      R"pbdoc(
-      Add two numbers
-
-      Parameters
-      ----------
-      a : float
-          First number.
-      a : float
-          Second number.
-
-
-      Returns
-      -------
-      sum: float
-          The result of a + b.
-      )pbdoc");
 
 #ifdef VERSION_INFO
   m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);

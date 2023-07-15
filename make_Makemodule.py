@@ -29,6 +29,7 @@ def static_vars(**kwargs):
     Decorator for caching variables within functions
 
     """
+
     def decorate(func):
         for k in kwargs:
             setattr(func, k, kwargs[k])
@@ -103,15 +104,17 @@ def make_add_to_LTLIBRARIES(libname, LT_prefix, **kwargs):
 
     """
     value = ""
-    value += basic_maker_string("{}_LTLIBRARIES".format(LT_prefix), "+=",
-                                ["{}.la".format(libname)])
+    value += basic_maker_string(
+        "{}_LTLIBRARIES".format(LT_prefix), "+=", ["{}.la".format(libname)]
+    )
 
     for k in kwargs:
         if not kwargs[k] or len(kwargs[k]) == 0:
             continue
         value += "\n"
         value += basic_maker_string(
-            "{}_la_{}".format(libname.replace("-", "_"), k), "=", kwargs[k])
+            "{}_la_{}".format(libname.replace("-", "_"), k), "=", kwargs[k]
+        )
 
     return value
 
@@ -133,15 +136,17 @@ def make_add_to_PROGRAMS(program_name, PROGRAMS_prefix, **kwargs):
 
     """
     value = ""
-    value += basic_maker_string("{}_PROGRAMS".format(PROGRAMS_prefix), "+=",
-                                [program_name])
+    value += basic_maker_string(
+        "{}_PROGRAMS".format(PROGRAMS_prefix), "+=", [program_name]
+    )
 
     for k in kwargs:
         if not kwargs[k] or len(kwargs[k]) == 0:
             continue
         value += "\n"
         value += basic_maker_string(
-            "{}_{}".format(program_name.replace("-", "_"), k), "=", kwargs[k])
+            "{}_{}".format(program_name.replace("-", "_"), k), "=", kwargs[k]
+        )
 
     return value
 
@@ -192,8 +197,7 @@ def make_HEADERS(includedir, files):
     files.sort()
     flattened = includedir.replace("/", "_")
 
-    value = flattened + "_includedir=" + os.path.join("$(includedir)",
-                                                      includedir)
+    value = flattened + "_includedir=" + os.path.join("$(includedir)", includedir)
     value += "\n"
     value += basic_maker_string(flattened + "_include_HEADERS", "=", files)
     return value
@@ -214,7 +218,8 @@ def files_with_extension_at_directory(extensions, directory):
 
     """
     files = [
-        f for ext in extensions
+        f
+        for ext in extensions
         for f in glob.glob(os.path.join(directory, "*{}".format(ext)))
     ]
     return files
@@ -297,13 +302,15 @@ def all_files_tracked_by_git():
     # return subprocess.check_output(
     #     ["git", "ls-tree", "--full-tree", "-r", "--name-only", "HEAD"], encoding="utf-8"
     # ).splitlines()
-    return subprocess.check_output(["git", "ls-files", "--recurse-submodules"],
-                                   encoding="utf-8").splitlines()
+    return subprocess.check_output(
+        ["git", "ls-files", "--recurse-submodules"], encoding="utf-8"
+    ).splitlines()
 
 
 def all_files_ignored_by_git():
-    return subprocess.check_output(["git", "status", "--ignored"],
-                                   encoding="utf-8").splitlines()
+    return subprocess.check_output(
+        ["git", "status", "--ignored"], encoding="utf-8"
+    ).splitlines()
 
 
 @static_vars(cached_roots={})
@@ -331,8 +338,10 @@ def relative_filepath_is_tracked_by_git(filename):
 
     git_root_path = relative_filepath_is_tracked_by_git.cached_roots[cwd]
 
-    return (os.path.relpath(os.path.realpath(filename),
-                            git_root_path) in all_files_tracked_by_git())
+    return (
+        os.path.relpath(os.path.realpath(filename), git_root_path)
+        in all_files_tracked_by_git()
+    )
 
 
 def purge_untracked_files(file_list):
@@ -416,8 +425,7 @@ def make_unit_test(unit_test_directory, ldadd=[]):
     test_name = "casm_unit_{}".format(last_directory)
 
     all_dir_files_relative = [
-        os.path.join(unit_test_directory, f)
-        for f in os.listdir(unit_test_directory)
+        os.path.join(unit_test_directory, f) for f in os.listdir(unit_test_directory)
     ]
     only_tracked_files = purge_untracked_files(all_dir_files_relative)
     only_makeable_files = purge_git_related_files(only_tracked_files)
@@ -426,8 +434,9 @@ def make_unit_test(unit_test_directory, ldadd=[]):
     # I think it would be better if instead of mixing up EXTRA_DIST files
     # with the test code, all files necessary for the test to run existed
     # in a separate subdirectory
-    source_files = [f for f in only_makeable_files if f.endswith("_test.cpp")
-                    ] + ["tests/unit/gtest_main_run_all.cpp"]
+    source_files = [f for f in only_makeable_files if f.endswith("_test.cpp")] + [
+        "tests/unit/gtest_main_run_all.cpp"
+    ]
     ldadd.append("libcasmtesting.la")
 
     value = basic_maker_string("TESTS", "+=", [test_name])
@@ -444,8 +453,7 @@ def make_unit_test(unit_test_directory, ldadd=[]):
     datadir = os.path.join(unit_test_directory, "data")
     if os.path.exists(datadir):
         all_data_files_relative = [
-            os.path.join(datadir, f)
-            for f in os.listdir(datadir)
+            os.path.join(datadir, f) for f in os.listdir(datadir)
         ]
         only_tracked_data_files = purge_untracked_files(all_data_files_relative)
         only_makeable_data_files = purge_git_related_files(only_tracked_data_files)
@@ -490,8 +498,10 @@ def make_libcasmtesting():
     libdir = "tests/unit"
     # We want all the files in libdir, except gtest_main_run_all.cpp
     sources_candidates = [
-        f for f in files_with_extension_at_directory(
-            header_and_source_extensions(), libdir)
+        f
+        for f in files_with_extension_at_directory(
+            header_and_source_extensions(), libdir
+        )
         if "gtest_main_run_all" not in f
     ]
 
@@ -567,8 +577,7 @@ def make_aggregated_functional_test():
 
     test_root = "tests/functional"
     test_group = [
-        name for name in os.listdir(test_root)
-        if name not in [".deps", ".libs"]
+        name for name in os.listdir(test_root) if name not in [".deps", ".libs"]
     ]
     test_group.sort()
 
@@ -620,12 +629,14 @@ def make_include(includeable_path):
     """
     assert includeable_path[0:8] == "include/"
     available_files = [
-        os.path.join(includeable_path, f) for f in os.listdir(includeable_path)
+        os.path.join(includeable_path, f)
+        for f in os.listdir(includeable_path)
         if os.path.isfile(os.path.join(includeable_path, f))
     ]
     only_tracked_files = purge_untracked_files(available_files)
     only_header_files = [
-        f for f in only_tracked_files
+        f
+        for f in only_tracked_files
         if is_extensionless_Eigen_header(f) or has_header_extension(f)
     ]
     only_header_files.sort()
@@ -645,8 +656,7 @@ def make_recursive_include(search_root):
     value = horizontal_divide()
 
     dirpaths = [
-        dirpath
-        for dirpath, dirnames, files in os.walk(search_root, followlinks=True)
+        dirpath for dirpath, dirnames, files in os.walk(search_root, followlinks=True)
     ]
     dirpaths.sort()
 
@@ -657,8 +667,7 @@ def make_recursive_include(search_root):
         # If this is true, then you passed a directory with no headers, and there's just
         # a dangling HEADER list
         if search_root not in candidate:
-            print(
-                "Skipping {} because there are no headers there...".format(d))
+            print("Skipping {} because there are no headers there...".format(d))
             continue
 
         value += candidate
@@ -698,8 +707,9 @@ def make_casm_complete():
     value = "if ENABLE_BASH_COMPLETION\n"
     value += "bashcompletiondir=$(BASH_COMPLETION_DIR)\n\n"
 
-    value += basic_maker_string("dist_bashcompletion_DATA", "=",
-                                ["apps/completer/casm"])
+    value += basic_maker_string(
+        "dist_bashcompletion_DATA", "=", ["apps/completer/casm"]
+    )
     value += "\n"
 
     value += make_add_to_PROGRAMS(
@@ -736,14 +746,12 @@ def make_lib(libname, search_root, additional_sources, **kwargs):
         for dirpath, dirnames, files in os.walk(search_root, followlinks=True)
     ]
     source_files = [
-        os.path.join(d, f) for d, fs in files for f in fs
-        if has_source_extension(f)
+        os.path.join(d, f) for d, fs in files for f in fs if has_source_extension(f)
     ]
 
-    return make_add_to_LTLIBRARIES(libname,
-                                   "lib",
-                                   SOURCES=source_files + additional_sources,
-                                   **kwargs)
+    return make_add_to_LTLIBRARIES(
+        libname, "lib", SOURCES=source_files + additional_sources, **kwargs
+    )
 
 
 def make_libcasm(name, additional_sources):
@@ -787,10 +795,9 @@ def make_libccasm(additional_sources):
     str
 
     """
-    value = make_lib("libccasm",
-                     "src/ccasm",
-                     additional_sources,
-                     LDFLAGS=["-avoid-version"])
+    value = make_lib(
+        "libccasm", "src/ccasm", additional_sources, LDFLAGS=["-avoid-version"]
+    )
     return value
 
 
@@ -815,46 +822,35 @@ def string_to_file(string, filepath):
 
 
 def _exit_on_bad_run_directory():
-    print(
-        "This script must be run from the root directory of the CASMcode-dev repo."
-    )
+    print("This script must be run from the root directory of the CASMcode-dev repo.")
     exit()
 
 
 def main():
-
-    chunk = make_aggregated_unit_test([
-        {
-            "directory": "tests/unit/casm_io",
-            "ldadd": [
-                "libcasm_global.la"
-            ],
-        },
-        {
-            "directory": "tests/unit/container",
-            "ldadd": [
-                "libcasm_global.la"
-            ],
-        },
-        {
-            "directory": "tests/unit/global",
-            "ldadd": [
-                "libcasm_global.la"
-            ],
-        },
-        {
-            "directory": "tests/unit/misc",
-            "ldadd": [
-                "libcasm_global.la"
-            ],
-        },
-        {
-            "directory": "tests/unit/system",
-            "ldadd": [
-                "libcasm_global.la"
-            ],
-        }
-    ])
+    chunk = make_aggregated_unit_test(
+        [
+            {
+                "directory": "tests/unit/casm_io",
+                "ldadd": ["libcasm_global.la"],
+            },
+            {
+                "directory": "tests/unit/container",
+                "ldadd": ["libcasm_global.la"],
+            },
+            {
+                "directory": "tests/unit/global",
+                "ldadd": ["libcasm_global.la"],
+            },
+            {
+                "directory": "tests/unit/misc",
+                "ldadd": ["libcasm_global.la"],
+            },
+            {
+                "directory": "tests/unit/system",
+                "ldadd": ["libcasm_global.la"],
+            },
+        ]
+    )
     target = os.path.join("tests", "unit", "Makemodule.am")
     string_to_file(chunk, target)
 
@@ -867,7 +863,8 @@ def main():
     string_to_file(chunk, target)
 
     header_files = [
-        f.replace("\\", "").replace(" ", "") for f in chunk.splitlines()
+        f.replace("\\", "").replace(" ", "")
+        for f in chunk.splitlines()
         if "include/" in f
     ]
 

@@ -8,7 +8,9 @@ namespace CASM {
 const std::string &version();  // Returns the version defined by the TXT_VERSION
                                // macro at compile time
 
-}
+const std::string &libcasm_global_version();
+
+}  // namespace CASM
 
 extern "C" {
 

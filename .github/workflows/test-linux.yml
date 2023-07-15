@@ -18,30 +18,16 @@ jobs:
           sudo apt-get install build-essential cmake
           pip install --upgrade pip wheel
           git submodule update --init --recursive
+          pip install -r test_requirements
+          CASM_PREFIX=$(python -c 'import site; print(site.getsitepackages()[0])')/libcasm
           echo "CASM_PREFIX=${CASM_PREFIX}" >> "$GITHUB_ENV"
-
-      - name: configure
-        shell: bash
-        run: |
-          mkdir -p build
-          cd build
-          cmake ..
 
       - name: make
         shell: bash
         run: |
-          cd build
-          make -j4 VERBOSE=1
+          pip install .
 
       - name: make test
         shell: bash
         run: |
-          cd build
-          make -j4 test
-
-      - name: upload test log
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-log
-          path: build/Testing/Temporary/LastTest.log
+          python -m pytest -rsap python/tests

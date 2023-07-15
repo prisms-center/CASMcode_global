@@ -1,12 +1,19 @@
 #include "casm/global/version.hh"
 
-using namespace CASM;
-
 #ifndef TXT_VERSION
 #define TXT_VERSION "unknown"
 #endif
 
-const std::string &CASM::version() {
-  static const std::string &ver = TXT_VERSION;
+namespace CASM {
+
+const std::string &version() {
+  static const std::string ver = TXT_VERSION;
   return ver;
-};
+}
+
+const std::string &libcasm_global_version() {
+  static const std::string ver = TXT_VERSION;
+  return ver;
+}
+
+}  // namespace CASM

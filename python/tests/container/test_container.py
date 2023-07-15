@@ -1,14 +1,38 @@
 import math
-import libcasm.container as container
+from libcasm.container import IntCounter, FloatCounter
 
-def test_TOL():
-    assert math.isclose(container.TOL, 1e-5)
 
-def test_KB():
-    assert math.isclose(container.KB, 8.6173423E-05) # eV/K
+def test_IntCounter():
+    counter = IntCounter(
+        initial=[0] * 3,
+        final=[2] * 3,
+        increment=[2] * 3,
+    )
+    assert isinstance(counter, IntCounter)
+    assert counter.valid() == True
+    values = [x for x in counter]
+    assert len(values) == 8
+    assert counter.valid() == False
 
-def test_PLANK():
-    assert math.isclose(container.PLANCK, 4.135667516E-15) # eV-s
+    counter.reset()
+    assert counter.valid() == True
+    values = [x for x in counter]
+    assert len(values) == 8
 
-def test_add():
-    assert math.isclose(container.add(1.0, 2.0), 3.0)
+
+def test_FloatCounter():
+    counter = FloatCounter(
+        initial=[0.0] * 3,
+        final=[2.0] * 3,
+        increment=[1.0] * 3,
+    )
+    assert isinstance(counter, FloatCounter)
+    assert counter.valid() == True
+    values = [x for x in counter]
+    assert len(values) == 27
+    assert counter.valid() == False
+
+    counter.reset()
+    assert counter.valid() == True
+    values = [x for x in counter]
+    assert len(values) == 27
