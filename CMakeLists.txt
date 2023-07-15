@@ -604,10 +604,10 @@ if(DEFINED SKBUILD)
   install(TARGETS _casmglobal DESTINATION casmglobal)
   if(APPLE)
     set_target_properties(
-      _casmglobal PROPERTIES INSTALL_RPATH "@loader_path/${CMAKE_INSTALL_LIBDIR}")
+      _casmglobal PROPERTIES INSTALL_RPATH "@loader_path/../${CMAKE_INSTALL_LIBDIR}")
   else()
     set_target_properties(
-      _casmglobal PROPERTIES INSTALL_RPATH "$ORIGIN/${CMAKE_INSTALL_LIBDIR}")
+      _casmglobal PROPERTIES INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
   endif()
 
   ### libcasm.container._container ###
@@ -617,10 +617,10 @@ if(DEFINED SKBUILD)
   install(TARGETS _container DESTINATION container)
   if(APPLE)
     set_target_properties(
-      _container PROPERTIES INSTALL_RPATH "@loader_path/${CMAKE_INSTALL_LIBDIR}")
+      _container PROPERTIES INSTALL_RPATH "@loader_path/../${CMAKE_INSTALL_LIBDIR}")
   else()
     set_target_properties(
-      _container PROPERTIES INSTALL_RPATH "$ORIGIN/${CMAKE_INSTALL_LIBDIR}")
+      _container PROPERTIES INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
   endif()
 
 endif()
