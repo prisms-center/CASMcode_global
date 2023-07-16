@@ -12,3 +12,6 @@ def test_KB():
 
 def test_PLANK():
     assert math.isclose(casmglobal.PLANCK, 4.135667516e-15)  # eV-s
+
+def test_libcasm_global_version():
+    assert casmglobal.libcasm_global_version() == "2.0.0"

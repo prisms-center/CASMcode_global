@@ -50,6 +50,10 @@ PYBIND11_MODULE(_casmglobal, m) {
   // Planck's Constant
   m.attr("PLANCK") = PLANCK;
 
+  m.def("libcasm_global_version", &libcasm_global_version, R"pbdoc(
+      The libcasm_global version.
+      )pbdoc");
+
 #ifdef VERSION_INFO
   m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
 #else

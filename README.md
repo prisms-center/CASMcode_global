@@ -72,7 +72,7 @@ To install development requirements, do:
 Installing in editable mode
 ---------------------------
 
-Building is performed using scikit-build to help create distributions that include both the C++ and Python portions of CASM, which are linked using pybind11. Using the standard build process, editable installation of the pure Python components is not supported by scikit-build or scikit-build-core (the next generation of scikit-build), but may be possible soon.
+Building is performed using [scikit-build](https://scikit-build.readthedocs.io/en/latest/index.html) to help create distributions that include both the C++ and Python portions of CASM, which are linked using pybind11. Using the standard build process, editable installation of the pure Python components is not supported by scikit-build or [scikit-build-core](https://scikit-build-core.readthedocs.io/en/latest/) (the next generation of scikit-build), but may be possible soon.
 
 Currently, editable installation can be done by first installing only the pure C++ portion of CASM and then installing the pybind11 wrapper and Python portions of CASM. The following is an example developing in a conda environment where the C++ library is installed in `$CONDA_PREFIX`:
 
@@ -146,10 +146,8 @@ C++:
 Creating distributions
 ----------------------
 
-To create a source distribituion do:
+To create a source and wheel distribituion do:
 
-    python -m build --sdist
+    python -m build
 
-To create a wheel do:
-
-    python -m build --wheel
+Files are included or excluded from the distrubution by [editing `MANIFEST.in`](https://packaging.python.org/en/latest/guides/using-manifest-in/).
