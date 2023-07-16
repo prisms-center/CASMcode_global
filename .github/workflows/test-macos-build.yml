@@ -1,4 +1,4 @@
-name: Testing on macos-latest
+name: Testing build on macos-latest
 
 on: [push, pull_request]
 
@@ -16,14 +16,19 @@ jobs:
         run: |
           brew update
           brew install cmake
-          pip install --upgrade pip wheel
+          pip install --upgrade pip wheel build
           git submodule update --init --recursive
           pip install -r test_requirements.txt
 
       - name: make
         shell: bash
         run: |
-          pip install .
+          python -m build
+
+      - name: install
+        shell: bash
+        run: |
+          pip install dist/*.whl
 
       - name: make test
         shell: bash
