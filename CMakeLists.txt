@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
 
+if(APPLE)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version")
+endif()
+
 project(CASMcode_global VERSION 2.0.0 LANGUAGES CXX)
 
 # set CMAKE_INSTALL_X variables
