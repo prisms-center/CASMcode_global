@@ -6,4 +6,5 @@ setup(
     packages=["libcasm", "libcasm.casmglobal", "libcasm.container"],
     package_dir={"": "python"},
     cmake_install_dir="python/libcasm",
+    include_package_data=False,
 )
