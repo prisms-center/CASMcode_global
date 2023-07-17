@@ -1,7 +1,5 @@
 name: Build wheels
 
-on: [push, pull_request]
-
 on:
   # Trigger on pull requests.
   pull_request:
