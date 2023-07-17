@@ -35,24 +35,28 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_sdist:
-    - name: Set up requirements and configuration variables
-      run: |
-        sudo apt-get update
-        sudo apt-get install build-essential cmake
-        pip install --upgrade pip wheel build
-        git submodule update --init --recursive
+    name: Build sdist
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Set up requirements and configuration variables
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential cmake
+          pip install --upgrade pip wheel build
+          git submodule update --init --recursive
 
-    - name: make
-      shell: bash
-      run: |
-        python -m build
+      - name: make
+        shell: bash
+        run: |
+          python -m build
 
-    - name: upload sdist
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: dist
-        path: dist/*.tar.gz
+      - name: upload sdist
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist/*.tar.gz
 
   upload_pypi:
     name: Publish [PyPI]
