@@ -37,3 +37,8 @@ before-all = "git submodule update --init --recursive"
 test-requires = "pytest"
 test-command = "pytest -rsap {project}/python/tests"
 test-skip = "*-macosx_arm64"
+
+[tool.cibuildwheel.macos]
+environment = {
+  MACOSX_DEPLOYMENT_TARGET="10.15",
+}
