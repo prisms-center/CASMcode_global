@@ -31,3 +31,7 @@ dependencies = [
 [project.urls]
 Homepage = "https://prisms-center.github.io/CASMcode_docs/"
 Repository = "https://github.com/prisms-center/CASMcode_global"
+
+[tool.cibuildwheel]
+test-requires = "pytest"
+test-command = "pytest -rsap {project}/python/tests"
