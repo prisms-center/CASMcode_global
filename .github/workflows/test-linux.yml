@@ -29,3 +29,16 @@ jobs:
         shell: bash
         run: |
           python -m pytest -rsap python/tests
+
+      - name: build docs
+        shell: bash
+        run: |
+          cd python/doc
+          make html
+
+      - name: upload docs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: casm-global-docs
+          path: python/doc/_build/html

@@ -35,7 +35,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
   build_sdist:
-    - name: Set up requirements & configuration variables
+    - name: Set up requirements and configuration variables
       run: |
         sudo apt-get update
         sudo apt-get install build-essential cmake
