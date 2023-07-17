@@ -33,8 +33,8 @@ Homepage = "https://prisms-center.github.io/CASMcode_docs/"
 Repository = "https://github.com/prisms-center/CASMcode_global"
 
 [build_sphinx]
-source-dir = doc
-build-dir  = doc/build
+source-dir = "doc"
+build-dir  = "doc/build"
 all_files  = 1
 
 [tool.cibuildwheel]
