@@ -34,3 +34,10 @@ jobs:
         shell: bash
         run: |
           python -m pytest -rsap python/tests
+
+      - name: upload libcasm-global-macos-latest-x86_64-dist
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: libcasm-global-macos-latest-x86_64-dist
+          path: dist

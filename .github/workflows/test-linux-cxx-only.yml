@@ -36,3 +36,10 @@ jobs:
         run: |
           cd build
           make -j4 test
+
+      - name: upload test log
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-log
+          path: build/Testing/Temporary/LastTest.log
