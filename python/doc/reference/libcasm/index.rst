@@ -1,8 +1,8 @@
 ..
     DO NOT DELETE! This causes _autosummary to generate stub files
 
-libcasm.casmglobal module
-=========================
+Reference (libcasm)
+===================
 
 .. autosummary::
     :toctree: _autosummary
@@ -10,3 +10,4 @@ libcasm.casmglobal module
     :recursive:
 
     libcasm.casmglobal
+    libcasm.container

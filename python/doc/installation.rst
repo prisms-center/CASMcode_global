@@ -1,40 +1,43 @@
 Installation
 ============
 
-Currently, CASM packages must be built by cloning the github repositories and building from source.
+Install from PyPI
+-----------------
+
+The latest version of libcasm-global can be installed with:
+
+    pip install libcasm-global
 
 
 Install from source
-===================
+-------------------
 
-Installation requires:
+Installation of libcasm-global from source requires standard compilers with support for C++17, Python >= 3.8, and CMake. For example:
 
-- Python >=3.8
-- git
-- Compilers:
+- On Ubuntu linux:
 
-  - On Ubuntu linux:
+  ```
+  sudo apt-get install build-essential cmake
+  ```
 
-    .. code-block::
+- On Mac OSX:
 
-        sudo apt-get install build-essential
+  ```
+  xcode-select --install
+  brew install cmake
+  ```
 
-  - On Mac OSX, install Command Line Tools for XCode:
+- In a conda environment:
 
-    .. code-block::
+  ```
+  conda create -n casm --override-channels -c conda-forge python=3 cmake
+  conda activate casm
+  ```
 
-        xcode-select --install
+Then `libcasm-global` can be installed with:
 
-
-Normal installation of `libcasm-global`:
-
-.. code-block::
-
-    git clone https://github.com/prisms-center/CASMcode_global.git
-    cd CASMcode_global
     pip install .
 
-Repeat to install additional CASM packages.
 
 To uninstall:
 
