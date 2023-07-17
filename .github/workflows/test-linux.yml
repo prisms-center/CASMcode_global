@@ -30,6 +30,10 @@ jobs:
         run: |
           python -m pytest -rsap python/tests
 
+      - name: Set up doc requirements
+        run: |
+          pip install -r doc_requirements.txt
+
       - name: build docs
         shell: bash
         run: |

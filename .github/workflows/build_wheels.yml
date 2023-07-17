@@ -7,9 +7,9 @@ on:
   # Trigger on version tags. This prevents building commits
   # twice when the pull request source branch is in the same repository.
   push:
-    tags:
-      - "v*"
-      - "test*"
+    # tags:
+    #  - "v*"
+    #  - "test*"
 
   # Trigger on request.
   workflow_dispatch:
