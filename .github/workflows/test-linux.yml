@@ -38,7 +38,7 @@ jobs:
         shell: bash
         run: |
           cd python/doc
-          sphinx-build -b html . _build
+          sphinx-build -b html . _build/html
 
       - name: upload docs
         if: always()
