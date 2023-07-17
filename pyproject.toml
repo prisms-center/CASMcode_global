@@ -33,5 +33,7 @@ Homepage = "https://prisms-center.github.io/CASMcode_docs/"
 Repository = "https://github.com/prisms-center/CASMcode_global"
 
 [tool.cibuildwheel]
+before-all = "git submodule update --init --recursive"
 test-requires = "pytest"
 test-command = "pytest -rsap {project}/python/tests"
+test-skip = "*-macosx_arm64"
