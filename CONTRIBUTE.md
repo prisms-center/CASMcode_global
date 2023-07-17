@@ -49,7 +49,7 @@ Install documentation requirements:
 Install `libcasm-global` first, then build and open the documentation:
 
     cd python/doc
-    make html
+    sphinx-build -b html . _build
     open _build/html/index.html
 
 
