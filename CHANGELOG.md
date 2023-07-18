@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added external/nlohmann JSON implementation
 - Added external/pybind11_json
 - Added Python package libcasm.casmglobal with CASM global constants
-- Added Python package libcasm.container with IntCounter and FloatCounter
+- Added Python package libcasm.counter with IntCounter and FloatCounter
 - Added GitHub Actions for unit testing
 - Added GitHub Action build_wheels.yml for Python wheel building using cibuildwheel
 - Added Python documentation

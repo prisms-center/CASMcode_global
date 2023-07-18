@@ -39,14 +39,14 @@ EigenCounter<Eigen::VectorXd> make_float_counter(
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
-PYBIND11_MODULE(_container, m) {
+PYBIND11_MODULE(_counter, m) {
   using namespace CASMpy;
 
   m.doc() = R"pbdoc(
-        libcasm.container
-        -----------------
+        libcasm.counter._counter
+        ------------------------
 
-        CASM containers, part of libcasm-global.
+        CASM counters allow looping over many incrementing variables in one loop.
 
         )pbdoc";
 

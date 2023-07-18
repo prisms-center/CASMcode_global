@@ -1,5 +1,5 @@
 import math
-from libcasm.container import IntCounter, FloatCounter
+from libcasm.counter import IntCounter, FloatCounter
 
 
 def test_IntCounter():
