@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2023-03-05
+
 ### Added
 
 - This module includes parts of CASM v1 that are generically useful, including: casm/casm_io, casm/container, casm/external/Eigen, casm/external/gzstream, casm/external/MersenneTwister, casm/global, casm/misc, and casm/system
