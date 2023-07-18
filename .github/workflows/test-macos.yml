@@ -12,66 +12,20 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Set up requirements
+      - name: Set up requirements & configuration variables
         run: |
           brew update
-          brew install autoconf automake ccache
+          brew install cmake
           pip install --upgrade pip wheel
-          pip install GitPython
-
-      - name: cache casm build
-        id: cache-build
-        uses: actions/cache@v3
-        with:
-          path: build
-          key: ${{ runner.os }}-build
-
-      - name: cache ccache
-        id: cache-ccache
-        uses: actions/cache@v3
-        with:
-          path: ~/.ccache
-          key: ${{ runner.os }}-ccache
-
-      - name: mkdir build
-        shell: bash -el {0}
-        if: steps.cache-build.outputs.cache-hit != 'true'
-        run: |
-          mkdir build
+          git submodule update --init --recursive
+          pip install -r test_requirements.txt
 
       - name: make
-        shell: bash -el {0}
+        shell: bash
         run: |
-          git submodule update --init --recursive
-          bash bootstrap.sh
-          cd build
-          ../configure CC='ccache cc' CXX='ccache c++' CXXFLAGS='-O3 -Wall -DNDEBUG'
-          make -j4
+          pip install .
 
-      - name: make check
-        shell: bash -el {0}
+      - name: make test
+        shell: bash
         run: |
-          cd build
-          make check -j4
-
-      - name: upload test log
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-log
-          path: build/test-suite.log
-
-      - name: make distcheck
-        shell: bash -el {0}
-        run: |
-          mkdir build_distcheck && cd build_distcheck
-          ../configure CC='ccache cc' CXX='ccache c++' CXXFLAGS='-O3 -Wall -DNDEBUG'
-          export DISTCHECK_CONFIGURE_FLAGS=" CC='ccache cc' CXX='ccache c++' CXXFLAGS='-O3 -Wall -DNDEBUG' "
-          make distcheck -j4
-
-      - name: upload tarball
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: casm-global-targz
-          path: build_distcheck/casm-global-*.tar.gz
+          python -m pytest -rsap python/tests

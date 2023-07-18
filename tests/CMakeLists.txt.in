@@ -1,0 +1,132 @@
+# see /opt/local/share/cmake-3.16/Modules/FindGTest.cmake
+find_package(GTest QUIET)
+
+# NOTE: the upper case GTEST! CK
+if(NOT GTEST_FOUND)
+  # Download and unpack googletest at configure time
+  # but only if needed! CK
+  configure_file(${CMAKE_SOURCE_DIR}/cmake/GoogleTest-CMakeLists.txt.in
+    ${CMAKE_BINARY_DIR}/googletest-download/CMakeLists.txt
+  )
+  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download
+  )
+  if(result)
+    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+  endif()
+
+  execute_process(COMMAND ${CMAKE_COMMAND} --build .
+    RESULT_VARIABLE result
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download
+  )
+  if(result)
+    message(FATAL_ERROR "Build step for googletest failed: ${result}")
+  endif()
+
+  # Add googletest directly to our build. This defines
+  # the gtest and gtest_main targets.
+  add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
+    ${CMAKE_BINARY_DIR}/googletest-build
+    EXCLUDE_FROM_ALL
+  )
+endif()
+
+# create libcasm_testing
+set(
+  libcasm_testing_SOURCES
+@libcasm_testing_source_files@)
+add_library(casm_testing SHARED ${libcasm_testing_SOURCES})
+target_include_directories(casm_testing
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/unit>
+)
+target_link_libraries(casm_testing
+  gtest
+  casm_global)
+target_compile_options(casm_testing
+  PUBLIC
+    "-DABS_SRCDIR=\"${CMAKE_SOURCE_DIR}\""
+    "-DABS_TOP_BUILDDIR=\"${CMAKE_BINARY_DIR}\""
+)
+
+################################################################
+# casm_unit_casm_io
+add_executable(casm_unit_casm_io
+@casm_unit_casm_io_source_files@)
+target_compile_features(casm_unit_casm_io PRIVATE cxx_auto_type)
+target_link_libraries(casm_unit_casm_io
+  gtest
+  casm_global
+  casm_testing
+)
+target_include_directories(casm_unit_casm_io
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/unit>
+)
+
+add_test(NAME casm_unit_casm_io COMMAND casm_unit_casm_io)
+
+################################################################
+# casm_unit_container
+add_executable(casm_unit_container
+@casm_unit_container_source_files@)
+target_compile_features(casm_unit_container PRIVATE cxx_auto_type)
+target_link_libraries(casm_unit_container
+  gtest
+  casm_global
+  casm_testing
+)
+target_include_directories(casm_unit_container
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/unit>
+)
+add_test(NAME casm_unit_container COMMAND casm_unit_container)
+
+################################################################
+# casm_unit_global
+add_executable(casm_unit_global
+@casm_unit_global_source_files@)
+target_compile_features(casm_unit_global PRIVATE cxx_auto_type)
+target_link_libraries(casm_unit_global
+  gtest
+  casm_global
+  casm_testing
+)
+target_include_directories(casm_unit_global
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/unit>
+)
+add_test(NAME casm_unit_global COMMAND casm_unit_global)
+
+################################################################
+# casm_unit_misc
+add_executable(casm_unit_misc
+@casm_unit_misc_source_files@)
+target_compile_features(casm_unit_misc PRIVATE cxx_auto_type)
+target_link_libraries(casm_unit_misc
+  gtest
+  casm_global
+  casm_testing
+)
+target_include_directories(casm_unit_misc
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/unit>
+)
+add_test(NAME casm_unit_misc COMMAND casm_unit_misc)
+
+################################################################
+# casm_unit_system
+add_executable(casm_unit_system
+@casm_unit_system_source_files@)
+target_compile_features(casm_unit_system PRIVATE cxx_auto_type)
+target_link_libraries(casm_unit_system
+  gtest
+  casm_global
+  casm_testing
+)
+target_include_directories(casm_unit_system
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/unit>
+)
+add_test(NAME casm_unit_system COMMAND casm_unit_system)

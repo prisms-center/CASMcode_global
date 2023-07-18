@@ -98,6 +98,53 @@ struct traits<
   typedef _Compare Compare;
 };
 
+template <typename _CounterType>
+class CounterIterator {
+ public:
+  typedef _CounterType CounterType;
+
+  // Iterator tags here...
+  using iterator_category = std::input_iterator_tag;
+  using difference_type = std::ptrdiff_t;
+  using value_type = typename CounterType::Container;
+  using pointer = value_type const *;    // or also value_type*
+  using reference = value_type const &;  // or also value_type&
+
+  /// \brief Iterator constructor
+  ///
+  /// \param ptr Pointer to Counter, or nullptr for end iterator
+  CounterIterator(CounterType *ptr = nullptr) : m_ptr(ptr) {}
+
+  reference operator*() const { return m_ptr->current(); }
+  pointer operator->() { return &m_ptr->current(); }
+
+  // Prefix increment
+  CounterIterator &operator++() {
+    ++(*m_ptr);
+    if (!m_ptr->valid()) {
+      m_ptr = nullptr;
+    }
+    return *this;
+  }
+
+  // Postfix increment
+  CounterIterator operator++(int) {
+    CounterIterator tmp = *this;
+    ++(*this);
+    return tmp;
+  }
+
+  friend bool operator==(const CounterIterator &a, const CounterIterator &b) {
+    return a.m_ptr == b.m_ptr;
+  };
+  friend bool operator!=(const CounterIterator &a, const CounterIterator &b) {
+    return a.m_ptr != b.m_ptr;
+  };
+
+ private:
+  CounterType *m_ptr;
+};
+
 template <typename _Container,
           typename _value_type = typename _Container::value_type,
           typename _size_type = typename _Container::size_type,
@@ -146,6 +193,10 @@ class Counter
       : Base(_initial, _final, _increment, _access, _compare) {
     _init();
   }
+
+  CounterIterator<Counter> begin() { return CounterIterator<Counter>(this); }
+
+  CounterIterator<Counter> end() { return CounterIterator<Counter>(); }
 
   /// Increment the Counter
   ///

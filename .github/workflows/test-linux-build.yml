@@ -1,4 +1,4 @@
-name: Testing on ubuntu-latest
+name: Testing build on ubuntu-latest
 
 on: [push, pull_request]
 
@@ -16,33 +16,28 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install build-essential cmake
-          pip install --upgrade pip wheel
+          pip install --upgrade pip wheel build
           git submodule update --init --recursive
           pip install -r test_requirements.txt
 
       - name: make
         shell: bash
         run: |
-          pip install .
+          python -m build
+
+      - name: install
+        shell: bash
+        run: |
+          pip install dist/*.whl
 
       - name: make test
         shell: bash
         run: |
           python -m pytest -rsap python/tests
 
-      - name: Set up doc requirements
-        run: |
-          pip install -r doc_requirements.txt
-
-      - name: build docs
-        shell: bash
-        run: |
-          cd python/doc
-          sphinx-build -b html . _build/html
-
-      - name: upload docs
+      - name: upload libcasm-global-ubuntu-latest-x86_64-dist
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: casm-global-docs
-          path: python/doc/_build/html
+          name: libcasm-global-ubuntu-latest-x86_64-dist
+          path: dist
