@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added GitHub Action build_wheels.yml for Python wheel building using cibuildwheel
 - Added Python documentation
 
+### Changed
+
+- Changed KB and PLANCK to CODATA 2014 suggestions
+
 ### Removed
 
 - Removed autotools build process

@@ -16,11 +16,11 @@ typedef long int lint;
 // tolerance
 const double TOL = 0.00001;
 
-// Boltzmann Constant
-const double KB = 8.6173423E-05;  // eV/K
+// Boltzmann Constant (from CODATA 2014, https://arxiv.org/pdf/1507.07956.pdf)
+const double KB = 8.6173303E-05;  // eV/K
 
-// Planck's Constant
-const double PLANCK = 4.135667516E-15;  // eV-s
+// Planck's Constant (from CODATA 2014, https://arxiv.org/pdf/1507.07956.pdf)
+const double PLANCK = 4.135667662E-15;  // eV-s
 
 /// For long integer indexing:
 typedef INDEX_TYPE Index;
