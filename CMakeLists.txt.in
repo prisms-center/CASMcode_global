@@ -152,17 +152,17 @@ if(DEFINED SKBUILD)
       _casmglobal PROPERTIES INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
   endif()
 
-  ### libcasm.container._container ###
-  pybind11_add_module(_container MODULE
-                      "${PROJECT_SOURCE_DIR}/python/src/container.cpp")
-  target_link_libraries(_container PRIVATE casm_global)
-  install(TARGETS _container DESTINATION container)
+  ### libcasm.counter._counter ###
+  pybind11_add_module(_counter MODULE
+                      "${PROJECT_SOURCE_DIR}/python/src/counter.cpp")
+  target_link_libraries(_counter PRIVATE casm_global)
+  install(TARGETS _counter DESTINATION counter)
   if(APPLE)
     set_target_properties(
-      _container PROPERTIES INSTALL_RPATH "@loader_path/../${CMAKE_INSTALL_LIBDIR}")
+      _counter PROPERTIES INSTALL_RPATH "@loader_path/../${CMAKE_INSTALL_LIBDIR}")
   else()
     set_target_properties(
-      _container PROPERTIES INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
+      _counter PROPERTIES INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
   endif()
 
 endif()

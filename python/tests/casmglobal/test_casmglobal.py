@@ -7,11 +7,11 @@ def test_TOL():
 
 
 def test_KB():
-    assert math.isclose(casmglobal.KB, 8.6173423e-05)  # eV/K
+    assert math.isclose(casmglobal.KB, 8.6173303e-05)  # eV/K
 
 
 def test_PLANK():
-    assert math.isclose(casmglobal.PLANCK, 4.135667516e-15)  # eV-s
+    assert math.isclose(casmglobal.PLANCK, 4.135667662e-15)  # eV-s
 
 
 def test_libcasm_global_version():

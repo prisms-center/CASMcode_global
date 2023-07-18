@@ -39,21 +39,21 @@ EigenCounter<Eigen::VectorXd> make_float_counter(
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
-PYBIND11_MODULE(_container, m) {
+PYBIND11_MODULE(_counter, m) {
   using namespace CASMpy;
 
   m.doc() = R"pbdoc(
-        libcasm.container
-        -----------------
+        libcasm.counter._counter
+        ------------------------
 
-        CASM containers, part of libcasm-global.
+        CASM counters allow looping over many incrementing variables in one loop.
 
         )pbdoc";
 
   py::class_<EigenCounter<Eigen::VectorXi>>(m, "IntCounter", R"pbdoc(
       IntCounter allows looping over many incrementing integer variables in one loop
 
-      An IntCounter is initialized with `initial`, `final`, and `increment` arrays of the same length. The values in each element of `initial`are incremented by the corresponding value in `increment` in a series of loops, where the first element increments in the inner loop and the final element increments in the outer loop. The values in `final` give the (inclusive) final value each element is allowed to take. Increment values may be positive, negative, or mixed, and the corresponding elements of the `initial` and `final` arrays should be set according.
+      An IntCounter is initialized with `initial`, `final`, and `increment` arrays of the same length. The value in each element of `initial` is incremented by the corresponding value in `increment` in a series of loops, where the first element increments in the inner loop and the final element increments in the outer loop. The values in `final` give the (inclusive) final value each element is allowed to take. Increment values may be positive, negative, or mixed, and the corresponding elements of the `initial` and `final` arrays should be set according.
 
       Example:
 
@@ -142,7 +142,7 @@ PYBIND11_MODULE(_container, m) {
   py::class_<EigenCounter<Eigen::VectorXd>>(m, "FloatCounter", R"pbdoc(
       FloatCounter allows looping over many incrementing float variables in one loop
 
-      A FloatCounter is initialized with `initial`, `final`, and `increment` arrays of the same length. The values in each element of `initial`are incremented by the corresponding value in `increment` in a series of loops, where the first element increments in the inner loop and the final element increments in the outer loop. The values in `final` give the (inclusive) final value each element is allowed to take. Increment values may be positive, negative, or mixed, and the corresponding elements of the `initial` and `final` arrays should be set according.
+      A FloatCounter is initialized with `initial`, `final`, and `increment` arrays of the same length. The value in each element of `initial` is incremented by the corresponding value in `increment` in a series of loops, where the first element increments in the inner loop and the final element increments in the outer loop. The values in `final` give the (inclusive) final value each element is allowed to take. Increment values may be positive, negative, or mixed, and the corresponding elements of the `initial` and `final` arrays should be set according.
 
       Example:
 

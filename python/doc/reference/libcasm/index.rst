@@ -10,4 +10,4 @@ Reference (libcasm)
     :recursive:
 
     libcasm.casmglobal
-    libcasm.container
+    libcasm.counter

@@ -1,11 +1,11 @@
-.. image:: _static/logo_2.svg
+.. image:: _static/logo.svg
   :alt: CASM logo
   :width: 600
 
 libcasm-global
 ==============
 
-The libcasm-global package provides generically useful tools used by CASM_:
+The libcasm-global package provides generically useful tools for CASM_:
 
 - CASM global constants and definitions
 - Input / output tools, especially for JSON parsing and formatting
