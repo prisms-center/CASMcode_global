@@ -16,6 +16,9 @@ if casm_prefix is None:
 # C++ libraries: <python package prefix>/libcasm/lib/libcasm_<name>.dylib
 rpath = os.path.join(casm_prefix, "lib")
 
+# If on macosx, target 10.15
+os.environ["MACOSX_DEPLOYMENT_TARGET"]="10.15"
+
 # The main interface is through Pybind11Extension.
 # * You can add cxx_std=11/14/17, and then build_ext can be removed.
 # * You can set include_pybind11=false to add the include directory yourself,
