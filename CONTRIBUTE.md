@@ -142,11 +142,29 @@ See [Known Issues](https://scikit-build.readthedocs.io/en/latest/index.html#know
 - The cache directory (`_skbuild`) may need to be deleted between builds in some cases (like rebuilding with a different Python interpreter).
 
 
-## Formatting
+## Formatting and style
+
+#### Python formatting
 
 For Python code formatting, use black. Do:
 
     black python/
+
+#### Python docstring style
+
+- When in doubt, refer to [numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html), [pandas](https://pandas.pydata.org/docs/development/contributing_documentation.html), or [scikit-learn](https://scikit-learn.org/dev/developers/contributing.html#documentation).
+- When referred to in text, use the convention ```  `variable` ```, so variables appear italicized because (i.e. The *variable* is important).
+- When describing that a variable has a particular value or how it is used in a code snippet, then use either inline code (```variable=True```) or a code block:
+
+  ```
+  .. python-block:: Python
+
+      variable = 6
+  ```
+- Make use of ```.. rubric:: Special Methods``` in a class docstring to describe special members of a class, such as comparison operators (`<`, `<=`, `>`, `>=`, `*`, `+=`, `-=`, etc.) if they are defined
+
+
+#### C++ formatting
 
 For C++ code formatting, use clang-format with `-style=google`. Use the `stylize.sh` script to format files staged for commit. To enforce that it is run before committing, place the `pre-commit` file, or equivalent code, in `.git/hooks`. After `git add` do:
 
@@ -158,6 +176,14 @@ For C++ code formatting, use clang-format with `-style=google`. Use the `stylize
 When C++ files have been added or removed from `include/`, `src/`, or `tests/`, then `CMakeLists.txt` may be updated from the `CMakeLists.txt.in` template using:
 
       python make_CMakeLists.py
+
+
+#### C++ style
+
+- When in doubt, refer to the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
+- Use doxygen for comments.
+- Fit in to the existing style for a particular file
+
 
 ## Adding tests
 
