@@ -622,7 +622,7 @@ if(DEFINED SKBUILD)
       _counter PROPERTIES INSTALL_RPATH "@loader_path/../lib")
   else()
     set_target_properties(
-      _counter PROPERTIES INSTALL_RPATH "$ORIGIN/../")
+      _counter PROPERTIES INSTALL_RPATH "$ORIGIN/../lib")
   endif()
 
 endif()
