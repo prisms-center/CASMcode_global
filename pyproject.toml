@@ -47,19 +47,11 @@ before-all = "git submodule update --init --recursive"
 # Testing
 test-requires = "pytest"
 test-command = "pytest -rsap {project}/python/tests"
-test-skip = "*-macosx_arm64"
-
 
 [tool.cibuildwheel.macos]
 # C++17
 environment = { MACOSX_DEPLOYMENT_TARGET="10.15" }
 
-# Build for x86_64 and arm64
-archs = ["x86_64", "arm64"]
-
 [tool.cibuildwheel.linux]
-# Build for x86_64 and aarch64
-archs = ["x86_64", "aarch64"]
-
 # dependencies do not build for musl
 skip = ["pp* *musllinux*"]
