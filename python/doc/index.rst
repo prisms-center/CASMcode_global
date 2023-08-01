@@ -25,6 +25,12 @@ CASM is developed by the Van der Ven group, originally at the University of Mich
 For more information, see the `CASM homepage <CASM_>`_.
 
 
+License
+=======
+
+GNU Lesser General Public License (LGPL). Please see the LICENSE file available on GitHub_.
+
+
 Documentation
 =============
 
@@ -33,7 +39,6 @@ Documentation
 
     Installation <installation>
     Reference <reference/libcasm/index>
-    About libcasm-global <about>
 
 libcasm-global is available on GitHub_.
 

@@ -529,7 +529,7 @@ endforeach()
 install(
   TARGETS casm_global
   EXPORT CASMcode_globalTargets
-  DESTINATION ${CMAKE_INSTALL_LIBDIR})
+  DESTINATION lib)
 
 ##############################################
 ## Python extensions
@@ -606,10 +606,10 @@ if(DEFINED SKBUILD)
   install(TARGETS _casmglobal DESTINATION casmglobal)
   if(APPLE)
     set_target_properties(
-      _casmglobal PROPERTIES INSTALL_RPATH "@loader_path/../${CMAKE_INSTALL_LIBDIR}")
+      _casmglobal PROPERTIES INSTALL_RPATH "@loader_path/../lib")
   else()
     set_target_properties(
-      _casmglobal PROPERTIES INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
+      _casmglobal PROPERTIES INSTALL_RPATH "$ORIGIN/../lib")
   endif()
 
   ### libcasm.counter._counter ###
@@ -619,10 +619,10 @@ if(DEFINED SKBUILD)
   install(TARGETS _counter DESTINATION counter)
   if(APPLE)
     set_target_properties(
-      _counter PROPERTIES INSTALL_RPATH "@loader_path/../${CMAKE_INSTALL_LIBDIR}")
+      _counter PROPERTIES INSTALL_RPATH "@loader_path/../lib")
   else()
     set_target_properties(
-      _counter PROPERTIES INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
+      _counter PROPERTIES INSTALL_RPATH "$ORIGIN/../")
   endif()
 
 endif()
