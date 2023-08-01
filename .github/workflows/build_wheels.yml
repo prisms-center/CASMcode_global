@@ -121,7 +121,7 @@ jobs:
 
   upload_pypi:
     name: Publish [PyPI]
-    needs: [build_wheels, build_sdist]
+    needs: [build_wheels_linux_x86_64, build_wheels_linux_aarch64, build_wheels_macos_x86_64, build_wheels_macos_arm64, build_sdist]
     runs-on: ubuntu-latest
     # Specifying a GitHub environment is optional, but strongly encouraged
     # environment: release
