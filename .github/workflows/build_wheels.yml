@@ -2,7 +2,7 @@ name: Build wheels
 
 on:
   # Trigger on pull requests.
-  pull_request:
+  # pull_request:
 
   # Trigger on version tags. This prevents building commits
   # twice when the pull request source branch is in the same repository.
