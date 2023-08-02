@@ -24,18 +24,21 @@ find_package(ZLIB)
 
 # if no user CMAKE_INSTALL_PREFIX, use CASM_PREFIX if it exists, else use site-packages
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  message(STATUS "CMAKE_INSTALL_PREFIX initialized to default")
   if(DEFINED CASM_PREFIX)
-    message(STATUS "CMAKE_INSTALL_PREFIX initialized to default, so updating CMAKE_INSTALL_PREFIX to CASM_PREFIX")
+    message(STATUS "CASM_PREFIX: ${CASM_PREFIX}")
     set(CMAKE_INSTALL_PREFIX ${CASM_PREFIX} CACHE PATH "set CMAKE_INSTALL_PREFIX to CASM_PREFIX" FORCE)
     message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
   else()
     # find python site-packages location
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import site; print(site.getsitepackages()[0])"
+    execute_process(COMMAND python -c "import site; print(site.getsitepackages()[0])"
                     OUTPUT_VARIABLE site_packages_RAW)
     string(STRIP ${site_packages_RAW} site_packages)
-    message(STATUS "CMAKE_INSTALL_PREFIX initialized to default, and no CASM_PREFIX, so updating CMAKE_INSTALL_PREFIX to site-packages/libcasm")
-    set(CMAKE_INSTALL_PREFIX ${site_packages}/libcasm CACHE PATH "set CMAKE_INSTALL_PREFIX to site-packages/libcasm" FORCE)
-    message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+    if(site_packages)
+      message(STATUS "site_packages: ${site_packages}")
+      set(CMAKE_INSTALL_PREFIX ${site_packages}/libcasm CACHE PATH "set CMAKE_INSTALL_PREFIX to site-packages/libcasm" FORCE)
+      message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+    endif()
   endif()
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
