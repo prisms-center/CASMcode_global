@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2023-08-01
+
+### Added
+
+- Build wheels for Linux aarch64.
+
+### Changed
+
+- Changed libcasm_global install location to site_packages/libcasm/lib for all architetures.
+- Updated docs to refer to installation and contribution guidelines on CASMcode_docs page.
+
+
 ## [2.0.0] - 2023-07-18
 
 ### Added
