@@ -49,28 +49,7 @@ find_package(ZLIB)
 
 # Find CASM
 if(NOT DEFINED CASM_PREFIX)
-  message(STATUS "CASM_PREFIX not defined")
-  # try to find Python
-  find_package (Python COMPONENTS Interpreter Development)
-  if(DEFINED Python_EXECUTABLE)
-    # if Python found, obtain CASM_PREFIX from the libcasm.casmglobal
-    message(STATUS "found Python_EXECUTABLE: ${Python_EXECUTABLE}")
-    message(STATUS "checking for libcasm-global")
-    execute_process(
-      COMMAND pip show libcasm-global
-      RESULT_VARIABLE EXIT_CODE
-      OUTPUT_QUIET
-    )
-    if (${EXIT_CODE} EQUAL 0)
-      message(STATUS "found libcasm-global")
-      execute_process(COMMAND ${Python_EXECUTABLE} -m libcasm.casmglobal --prefix
-                      OUTPUT_VARIABLE CASM_PREFIX_RAW)
-      string(STRIP ${CASM_PREFIX_RAW} CASM_PREFIX)
-      message(STATUS "CASM_PREFIX: ${CASM_PREFIX}")
-    else()
-      message(STATUS "did not find libcasm-global")
-    endif()
-  endif()
+  message(FATAL_ERROR "CASM_PREFIX not defined")
 endif()
 if(DEFINED CASM_PREFIX)
   set(CASMcode_global_ROOT ${CASM_PREFIX}/share/CASMcode_global/cmake)
