@@ -156,36 +156,37 @@ with open("CMakeLists.txt", "w") as f:
 
 ### make tests/CMakeLists.txt from tests/CMakeLists.txt.in ###
 
-with open("tests/CMakeLists.txt.in", "r") as f:
+os.chdir("tests")
+with open("CMakeLists.txt.in", "r") as f:
     cmakelists = f.read()
 
-files = libcasm_testing_source_files("tests/unit")
+files = libcasm_testing_source_files("unit")
 cmake_file_strings = as_cmake_file_strings(files)
 cmakelists = cmakelists.replace("@libcasm_testing_source_files@", cmake_file_strings)
 
 
-additional = ["tests/unit/gtest_main_run_all.cpp"]
-files = unit_test_source_files("tests/unit/casm_io", additional)
+additional = ["unit/gtest_main_run_all.cpp"]
+files = unit_test_source_files("unit/casm_io", additional)
 cmake_file_strings = as_cmake_file_strings(files)
 cmakelists = cmakelists.replace("@casm_unit_casm_io_source_files@", cmake_file_strings)
 
-files = unit_test_source_files("tests/unit/container", additional)
+files = unit_test_source_files("unit/container", additional)
 cmake_file_strings = as_cmake_file_strings(files)
 cmakelists = cmakelists.replace(
     "@casm_unit_container_source_files@", cmake_file_strings
 )
 
-files = unit_test_source_files("tests/unit/global", additional)
+files = unit_test_source_files("unit/global", additional)
 cmake_file_strings = as_cmake_file_strings(files)
 cmakelists = cmakelists.replace("@casm_unit_global_source_files@", cmake_file_strings)
 
-files = unit_test_source_files("tests/unit/misc", additional)
+files = unit_test_source_files("unit/misc", additional)
 cmake_file_strings = as_cmake_file_strings(files)
 cmakelists = cmakelists.replace("@casm_unit_misc_source_files@", cmake_file_strings)
 
-files = unit_test_source_files("tests/unit/system", additional)
+files = unit_test_source_files("unit/system", additional)
 cmake_file_strings = as_cmake_file_strings(files)
 cmakelists = cmakelists.replace("@casm_unit_system_source_files@", cmake_file_strings)
 
-with open("tests/CMakeLists.txt", "w") as f:
+with open("CMakeLists.txt", "w") as f:
     f.write(cmakelists)

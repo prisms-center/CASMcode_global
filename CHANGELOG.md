@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.1] - 2023-08-01
+## [2.0.1] - 2023-08-02
 
 ### Added
 
@@ -15,8 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Changed libcasm_global install location to site_packages/libcasm/lib for all architetures.
+- Changed libcasm_global install location to site_packages/libcasm/lib for all architectures.
 - Updated docs to refer to installation and contribution guidelines on CASMcode_docs page.
+- Changed C++ tests to use a separate CMake project and fetch googletest
+
+### Removed
+- Removed googletest submodule
 
 
 ## [2.0.0] - 2023-07-18

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version")
 
-project(CASMcode_global VERSION 2.0.0 LANGUAGES CXX)
+project(CASMcode_global VERSION 2.0.1 LANGUAGES CXX)
 
 # set CMAKE_INSTALL_X variables
 include(GNUInstallDirs)
@@ -21,6 +21,16 @@ endif()
 
 # Should find ZLIB::ZLIB
 find_package(ZLIB)
+
+# if no user CMAKE_INSTALL_PREFIX, use CASM_PREFIX if it exists
+IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  if(DEFINED CASM_PREFIX)
+    message(STATUS "CMAKE_INSTALL_PREFIX initialized to default, so updating CMAKE_INSTALL_PREFIX to CASM_PREFIX")
+    set(CMAKE_INSTALL_PREFIX ${CASM_PREFIX} CACHE PATH "set CMAKE_INSTALL_PREFIX to CASM_PREFIX" FORCE)
+    message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+  endif()
+ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+
 
 ##############################################
 ## Build libcasm_global
@@ -166,9 +176,3 @@ if(DEFINED SKBUILD)
   endif()
 
 endif()
-
-
-##############################################
-## Add tests
-enable_testing()
-add_subdirectory(tests)
