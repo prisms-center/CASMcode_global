@@ -49,28 +49,7 @@ find_package(ZLIB)
 
 # Find CASM
 if(NOT DEFINED CASM_PREFIX)
-  message(STATUS "CASM_PREFIX not defined")
-  # try to find Python
-  find_package (Python COMPONENTS Interpreter Development)
-  if(DEFINED Python_EXECUTABLE)
-    # if Python found, obtain CASM_PREFIX from the libcasm.casmglobal
-    message(STATUS "found Python_EXECUTABLE: ${Python_EXECUTABLE}")
-    message(STATUS "checking for libcasm-global")
-    execute_process(
-      COMMAND pip show libcasm-global
-      RESULT_VARIABLE EXIT_CODE
-      OUTPUT_QUIET
-    )
-    if (${EXIT_CODE} EQUAL 0)
-      message(STATUS "found libcasm-global")
-      execute_process(COMMAND ${Python_EXECUTABLE} -m libcasm.casmglobal --prefix
-                      OUTPUT_VARIABLE CASM_PREFIX_RAW)
-      string(STRIP ${CASM_PREFIX_RAW} CASM_PREFIX)
-      message(STATUS "CASM_PREFIX: ${CASM_PREFIX}")
-    else()
-      message(STATUS "did not find libcasm-global")
-    endif()
-  endif()
+  message(FATAL_ERROR "CASM_PREFIX not defined")
 endif()
 if(DEFINED CASM_PREFIX)
   set(CASMcode_global_ROOT ${CASM_PREFIX}/share/CASMcode_global/cmake)
@@ -86,8 +65,8 @@ endif()
 ### libcasm_testing ###
 set(
   libcasm_testing_SOURCES
-  ${PROJECT_SOURCE_DIR}/tests/unit/autotools.cc
-  ${PROJECT_SOURCE_DIR}/tests/unit/testdir.cc
+  ${PROJECT_SOURCE_DIR}/unit/autotools.cc
+  ${PROJECT_SOURCE_DIR}/unit/testdir.cc
 )
 add_library(casm_testing SHARED ${libcasm_testing_SOURCES})
 target_include_directories(casm_testing
@@ -110,11 +89,11 @@ enable_testing()
 ################################################################
 # casm_unit_casm_io
 add_executable(casm_unit_casm_io
-  ${PROJECT_SOURCE_DIR}/tests/unit/gtest_main_run_all.cpp
-  ${PROJECT_SOURCE_DIR}/tests/unit/casm_io/DataFormatter_test.cpp
-  ${PROJECT_SOURCE_DIR}/tests/unit/casm_io/EnumIO_test.cpp
-  ${PROJECT_SOURCE_DIR}/tests/unit/casm_io/Log_test.cpp
-  ${PROJECT_SOURCE_DIR}/tests/unit/casm_io/jsonParser_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
+  ${PROJECT_SOURCE_DIR}/unit/casm_io/DataFormatter_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/casm_io/EnumIO_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/casm_io/Log_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/casm_io/jsonParser_test.cpp
 )
 target_link_libraries(casm_unit_casm_io
   gtest_all
@@ -132,8 +111,8 @@ add_test(NAME casm_unit_casm_io COMMAND casm_unit_casm_io)
 ################################################################
 # casm_unit_container
 add_executable(casm_unit_container
-  ${PROJECT_SOURCE_DIR}/tests/unit/gtest_main_run_all.cpp
-  ${PROJECT_SOURCE_DIR}/tests/unit/container/Counter_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
+  ${PROJECT_SOURCE_DIR}/unit/container/Counter_test.cpp
 )
 target_link_libraries(casm_unit_container
   gtest_all
@@ -151,8 +130,8 @@ add_test(NAME casm_unit_container COMMAND casm_unit_container)
 ################################################################
 # casm_unit_global
 add_executable(casm_unit_global
-  ${PROJECT_SOURCE_DIR}/tests/unit/gtest_main_run_all.cpp
-  ${PROJECT_SOURCE_DIR}/tests/unit/global/version_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
+  ${PROJECT_SOURCE_DIR}/unit/global/version_test.cpp
 )
 target_link_libraries(casm_unit_global
   gtest_all
@@ -170,9 +149,9 @@ add_test(NAME casm_unit_global COMMAND casm_unit_global)
 ################################################################
 # casm_unit_misc
 add_executable(casm_unit_misc
-  ${PROJECT_SOURCE_DIR}/tests/unit/gtest_main_run_all.cpp
-  ${PROJECT_SOURCE_DIR}/tests/unit/misc/string_algorithm_test.cpp
-  ${PROJECT_SOURCE_DIR}/tests/unit/misc/cloneable_ptr_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
+  ${PROJECT_SOURCE_DIR}/unit/misc/string_algorithm_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/misc/cloneable_ptr_test.cpp
 )
 target_link_libraries(casm_unit_misc
   gtest_all
@@ -190,8 +169,8 @@ add_test(NAME casm_unit_misc COMMAND casm_unit_misc)
 ################################################################
 # casm_unit_system
 add_executable(casm_unit_system
-  ${PROJECT_SOURCE_DIR}/tests/unit/gtest_main_run_all.cpp
-  ${PROJECT_SOURCE_DIR}/tests/unit/system/RuntimeLibrary_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
+  ${PROJECT_SOURCE_DIR}/unit/system/RuntimeLibrary_test.cpp
 )
 target_link_libraries(casm_unit_system
   gtest_all
