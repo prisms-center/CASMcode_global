@@ -2,6 +2,10 @@ name: Testing on ubuntu-latest
 
 on: [push, pull_request]
 
+env:
+  SKBUILD_CONFIGURE_OPTIONS: -DCMAKE_CXX_FLAGS='-D_GLIBCXX_USE_CXX11_ABI=0'
+  SKBUILD_BUILD_OPTIONS: --verbose
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,11 +23,27 @@ jobs:
           pip install --upgrade pip wheel
           git submodule update --init --recursive
           pip install -r test_requirements.txt
+          echo "SKBUILD_CONFIGURE_OPTIONS=${{ env.SKBUILD_CONFIGURE_OPTIONS }}" >> "$GITHUB_ENV"
+          echo "SKBUILD_BUILD_OPTIONS=${{ env.SKBUILD_BUILD_OPTIONS }}" >> "$GITHUB_ENV"
 
       - name: make
         shell: bash
         run: |
-          pip install .
+          pip install -v .
+
+      - name: check
+        shell: bash
+        run: |
+          pip freeze
+          CASM_PREFIX=`python -m libcasm.casmglobal --prefix`
+          echo "CASM_PREFIX: ${CASM_PREFIX}"
+          if [ -d ${CASM_PREFIX}/.. ]; then ls -hl ${CASM_PREFIX}/..; fi
+          if [ -d ${CASM_PREFIX} ]; then ls -hl ${CASM_PREFIX}; fi
+          if [ -d ${CASM_PREFIX}/lib ]; then ls -hl ${CASM_PREFIX}/lib; fi
+          if [ -d ${CASM_PREFIX}/lib64 ]; then ls -hl ${CASM_PREFIX}/lib64; fi
+          if [ -d ${CASM_PREFIX}/include ]; then ls -hl ${CASM_PREFIX}/include; fi
+          if [ -d ${CASM_PREFIX}/casmglobal ]; then ls -hl ${CASM_PREFIX}/casmglobal; fi
+          if [ -d ${CASM_PREFIX}/container ]; then ls -hl ${CASM_PREFIX}/container; fi
 
       - name: make test
         shell: bash
@@ -44,5 +64,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: casm-global-docs
+          name: libcasm-global-docs
           path: python/doc/_build/html

@@ -2,7 +2,7 @@ import glob
 import os
 import sys
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 
 # Available at setup time due to pyproject.toml
 from pybind11.setup_helpers import Pybind11Extension, build_ext

@@ -17,29 +17,51 @@ jobs:
           sudo apt-get update
           sudo apt-get install build-essential cmake
           git submodule update --init --recursive
+          pip install -r build_requirements.txt
+          CASM_PREFIX=$(python -c "import site; print(site.getsitepackages()[0])")
+          echo "CASM_PREFIX=${CASM_PREFIX}" >> "$GITHUB_ENV"
 
       - name: configure
         shell: bash
         run: |
-          mkdir build
-          cd build
-          cmake -DCMAKE_INSTALL_PREFIX=$CASM_PREFIX ..
+          mkdir build_cxx_only
+          cd build_cxx_only
+          cmake -DCASM_PREFIX=${CASM_PREFIX} -DCMAKE_CXX_FLAGS='-D_GLIBCXX_USE_CXX11_ABI=0' -DCMAKE_BUILD_TYPE=Release ..
 
       - name: make
         shell: bash
         run: |
-          cd build
+          cd build_cxx_only
           make -j4 VERBOSE=1
 
-      - name: make test
+      - name: install
         shell: bash
         run: |
-          cd build
-          make -j4 test
+          cd build_cxx_only
+          make install
+
+      - name: configure tests
+        shell: bash
+        run: |
+          mkdir build_cxx_test
+          cd build_cxx_test
+          cmake -DCASM_PREFIX=${CASM_PREFIX} -DCMAKE_CXX_FLAGS='-D_GLIBCXX_USE_CXX11_ABI=0' -DCMAKE_BUILD_TYPE=Release ../tests
+
+      - name: make tests
+        shell: bash
+        run: |
+          cd build_cxx_test
+          make -j4 VERBOSE=1
+
+      - name: run tests
+        shell: bash
+        run: |
+          cd build_cxx_test
+          make test
 
       - name: upload test log
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: test-log
-          path: build/Testing/Temporary/LastTest.log
+          name: libcasm-global-cxx-test-log
+          path: build_cxx_test/Testing/Temporary/LastTest.log

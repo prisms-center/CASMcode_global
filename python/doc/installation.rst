@@ -1,10 +1,15 @@
 Installation
 ============
 
+
 Install from PyPI
 -----------------
 
-The latest version of libcasm-global can be installed with:
+.. note::
+
+    CASM is built for macOS x86_64 (Intel), macOS arm64 (Apple Silicon), Linux x86_64, and Linux aarch64.
+
+The latest release of libcasm-global can be installed with:
 
     pip install libcasm-global
 
@@ -12,35 +17,15 @@ The latest version of libcasm-global can be installed with:
 Install from source
 -------------------
 
-Installation of libcasm-global from source requires standard compilers with support for C++17, Python >= 3.8, and CMake. For example:
-
-- On Ubuntu linux:
-
-  ```
-  sudo apt-get install build-essential cmake
-  ```
-
-- On Mac OSX:
-
-  ```
-  xcode-select --install
-  brew install cmake
-  ```
-
-- In a conda environment:
-
-  ```
-  conda create -n casm --override-channels -c conda-forge python=3 cmake
-  conda activate casm
-  ```
-
-Then libcasm-global can be installed with:
-
-    pip install .
+See the `libcasm contribution guide`_.
 
 
-To uninstall:
+For contributors
+----------------
 
-.. code-block::
+See the `libcasm contribution guide`_.
 
-    pip uninstall libcasm-global
+
+.. _`libcasm  contribution guide`: https://prisms-center.github.io/CASMcode_docs/pages/contributing_to_libcasm_packages/
+.. _CASM: https://prisms-center.github.io/CASMcode_docs/
+.. _GitHub: https://github.com/prisms-center/CASMcode_global/
