@@ -1,38 +1,89 @@
-# see /opt/local/share/cmake-3.16/Modules/FindGTest.cmake
-find_package(GTest QUIET)
+cmake_minimum_required(VERSION 3.20)
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version")
 
-# NOTE: the upper case GTEST! CK
-if(NOT GTEST_FOUND)
-  # Download and unpack googletest at configure time
-  # but only if needed! CK
-  configure_file(${CMAKE_SOURCE_DIR}/cmake/GoogleTest-CMakeLists.txt.in
-    ${CMAKE_BINARY_DIR}/googletest-download/CMakeLists.txt
-  )
-  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-    RESULT_VARIABLE result
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download
-  )
-  if(result)
-    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-  endif()
+project(CASMcode_global_tests VERSION 2.0.1 LANGUAGES CXX)
 
-  execute_process(COMMAND ${CMAKE_COMMAND} --build .
-    RESULT_VARIABLE result
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download
-  )
-  if(result)
-    message(FATAL_ERROR "Build step for googletest failed: ${result}")
-  endif()
 
-  # Add googletest directly to our build. This defines
-  # the gtest and gtest_main targets.
-  add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
-    ${CMAKE_BINARY_DIR}/googletest-build
-    EXCLUDE_FROM_ALL
-  )
+# set CMAKE_INSTALL_X variables
+include(GNUInstallDirs)
+
+# specify the C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# try to use ccache
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
 endif()
 
-# create libcasm_testing
+### googletest ###
+include(FetchContent)
+
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        v1.13.0
+)
+FetchContent_MakeAvailable(googletest)
+message(STATUS "googletest_SOURCE_DIR: ${googletest_SOURCE_DIR}")
+
+# compile Google Test as an object library
+add_library(gtest_all OBJECT "${googletest_SOURCE_DIR}/googletest/src/gtest-all.cc")
+set_property(TARGET gtest_all PROPERTY INCLUDE_DIRECTORIES
+  "${googletest_SOURCE_DIR}/googletest/include"
+  "${googletest_SOURCE_DIR}/googletest")
+set_property(TARGET gtest_all PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_compile_options(gtest_all
+  PUBLIC
+    "-DGTEST_HAS_PTHREAD=0"
+    "-DGTEST_LINKED_AS_SHARED_LIBRARY=1"
+)
+
+### ZLIB ###
+# Should find ZLIB::ZLIB
+find_package(ZLIB)
+
+
+### CASM ###
+
+# Find CASM
+if(NOT DEFINED CASM_PREFIX)
+  message(STATUS "CASM_PREFIX not defined")
+  # try to find Python
+  find_package (Python COMPONENTS Interpreter Development)
+  if(DEFINED Python_EXECUTABLE)
+    # if Python found, obtain CASM_PREFIX from the libcasm.casmglobal
+    message(STATUS "found Python_EXECUTABLE: ${Python_EXECUTABLE}")
+    message(STATUS "checking for libcasm-global")
+    execute_process(
+      COMMAND pip show libcasm-global
+      RESULT_VARIABLE EXIT_CODE
+      OUTPUT_QUIET
+    )
+    if (${EXIT_CODE} EQUAL 0)
+      message(STATUS "found libcasm-global")
+      execute_process(COMMAND ${Python_EXECUTABLE} -m libcasm.casmglobal --prefix
+                      OUTPUT_VARIABLE CASM_PREFIX_RAW)
+      string(STRIP ${CASM_PREFIX_RAW} CASM_PREFIX)
+      message(STATUS "CASM_PREFIX: ${CASM_PREFIX}")
+    else()
+      message(STATUS "did not find libcasm-global")
+    endif()
+  endif()
+endif()
+if(DEFINED CASM_PREFIX)
+  set(CASMcode_global_ROOT ${CASM_PREFIX}/share/CASMcode_global/cmake)
+endif()
+
+find_package(CASMcode_global)
+if(NOT CASMcode_global_FOUND)
+  message(FATAL_ERROR "CMake failed to find CASMcode_global")
+endif()
+# if successful, we have CASM::casm_global
+
+
+### libcasm_testing ###
 set(
   libcasm_testing_SOURCES
   ${PROJECT_SOURCE_DIR}/tests/unit/autotools.cc
@@ -42,15 +93,19 @@ add_library(casm_testing SHARED ${libcasm_testing_SOURCES})
 target_include_directories(casm_testing
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/unit>
+    $<BUILD_INTERFACE:${googletest_SOURCE_DIR}/googletest/include>
 )
 target_link_libraries(casm_testing
-  gtest
-  casm_global)
+  gtest_all
+  CASM::casm_global
+)
 target_compile_options(casm_testing
   PUBLIC
     "-DABS_SRCDIR=\"${CMAKE_SOURCE_DIR}\""
     "-DABS_TOP_BUILDDIR=\"${CMAKE_BINARY_DIR}\""
 )
+
+enable_testing()
 
 ################################################################
 # casm_unit_casm_io
@@ -61,11 +116,11 @@ add_executable(casm_unit_casm_io
   ${PROJECT_SOURCE_DIR}/tests/unit/casm_io/Log_test.cpp
   ${PROJECT_SOURCE_DIR}/tests/unit/casm_io/jsonParser_test.cpp
 )
-target_compile_features(casm_unit_casm_io PRIVATE cxx_auto_type)
 target_link_libraries(casm_unit_casm_io
-  gtest
-  casm_global
+  gtest_all
+  CASM::casm_global
   casm_testing
+  ZLIB::ZLIB
 )
 target_include_directories(casm_unit_casm_io
   PUBLIC
@@ -80,16 +135,17 @@ add_executable(casm_unit_container
   ${PROJECT_SOURCE_DIR}/tests/unit/gtest_main_run_all.cpp
   ${PROJECT_SOURCE_DIR}/tests/unit/container/Counter_test.cpp
 )
-target_compile_features(casm_unit_container PRIVATE cxx_auto_type)
 target_link_libraries(casm_unit_container
-  gtest
-  casm_global
+  gtest_all
+  CASM::casm_global
   casm_testing
+  ZLIB::ZLIB
 )
 target_include_directories(casm_unit_container
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/unit>
 )
+
 add_test(NAME casm_unit_container COMMAND casm_unit_container)
 
 ################################################################
@@ -98,16 +154,17 @@ add_executable(casm_unit_global
   ${PROJECT_SOURCE_DIR}/tests/unit/gtest_main_run_all.cpp
   ${PROJECT_SOURCE_DIR}/tests/unit/global/version_test.cpp
 )
-target_compile_features(casm_unit_global PRIVATE cxx_auto_type)
 target_link_libraries(casm_unit_global
-  gtest
-  casm_global
+  gtest_all
+  CASM::casm_global
   casm_testing
+  ZLIB::ZLIB
 )
 target_include_directories(casm_unit_global
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/unit>
 )
+
 add_test(NAME casm_unit_global COMMAND casm_unit_global)
 
 ################################################################
@@ -117,16 +174,17 @@ add_executable(casm_unit_misc
   ${PROJECT_SOURCE_DIR}/tests/unit/misc/string_algorithm_test.cpp
   ${PROJECT_SOURCE_DIR}/tests/unit/misc/cloneable_ptr_test.cpp
 )
-target_compile_features(casm_unit_misc PRIVATE cxx_auto_type)
 target_link_libraries(casm_unit_misc
-  gtest
-  casm_global
+  gtest_all
+  CASM::casm_global
   casm_testing
+  ZLIB::ZLIB
 )
 target_include_directories(casm_unit_misc
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/unit>
 )
+
 add_test(NAME casm_unit_misc COMMAND casm_unit_misc)
 
 ################################################################
@@ -135,14 +193,15 @@ add_executable(casm_unit_system
   ${PROJECT_SOURCE_DIR}/tests/unit/gtest_main_run_all.cpp
   ${PROJECT_SOURCE_DIR}/tests/unit/system/RuntimeLibrary_test.cpp
 )
-target_compile_features(casm_unit_system PRIVATE cxx_auto_type)
 target_link_libraries(casm_unit_system
-  gtest
-  casm_global
+  gtest_all
+  CASM::casm_global
   casm_testing
+  ZLIB::ZLIB
 )
 target_include_directories(casm_unit_system
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/unit>
 )
+
 add_test(NAME casm_unit_system COMMAND casm_unit_system)
