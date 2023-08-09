@@ -22,8 +22,6 @@ linux_aarch64_task:
   <<: *BUILD_AND_STORE_WHEELS
 
 macos_arm64_task:
-  depends_on:
-    - linux_aarch64
   macos_instance:
     image: ghcr.io/cirruslabs/macos-monterey-xcode:latest
   env:
