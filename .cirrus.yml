@@ -7,7 +7,6 @@ build_and_store_wheels: &BUILD_AND_STORE_WHEELS
     path: "wheelhouse/*"
 
 linux_aarch64_task:
-  name: Build Linux aarch64 wheels.
   compute_engine_instance:
     image_project: cirrus-images
     image: family/docker-builder-arm64
@@ -23,7 +22,6 @@ linux_aarch64_task:
   <<: *BUILD_AND_STORE_WHEELS
 
 macos_arm64_task:
-  name: Build macOS arm64 wheels.
   depends_on:
     - linux_aarch64
   macos_instance:
