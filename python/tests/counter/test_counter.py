@@ -1,5 +1,4 @@
-import math
-from libcasm.counter import IntCounter, FloatCounter
+from libcasm.counter import FloatCounter, IntCounter
 
 
 def test_IntCounter():
@@ -9,13 +8,13 @@ def test_IntCounter():
         increment=[2] * 3,
     )
     assert isinstance(counter, IntCounter)
-    assert counter.valid() == True
+    assert counter.valid() is True
     values = [x for x in counter]
     assert len(values) == 8
-    assert counter.valid() == False
+    assert counter.valid() is False
 
     counter.reset()
-    assert counter.valid() == True
+    assert counter.valid() is True
     values = [x for x in counter]
     assert len(values) == 8
 
@@ -27,12 +26,12 @@ def test_FloatCounter():
         increment=[1.0] * 3,
     )
     assert isinstance(counter, FloatCounter)
-    assert counter.valid() == True
+    assert counter.valid() is True
     values = [x for x in counter]
     assert len(values) == 27
-    assert counter.valid() == False
+    assert counter.valid() is False
 
     counter.reset()
-    assert counter.valid() == True
+    assert counter.valid() is True
     values = [x for x in counter]
     assert len(values) == 27
