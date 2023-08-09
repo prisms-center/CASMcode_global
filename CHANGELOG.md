@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [2.0.2] - 2023-08-09
+
+### Changed
+
+- Changed to build x86_64 wheels with Github Actions and aarch64 and arm64 wheels with Cirrus-CI
+- Remove manylinux tag for Linux wheels
+
+
 ## [2.0.1] - 2023-08-02
 
 ### Added
