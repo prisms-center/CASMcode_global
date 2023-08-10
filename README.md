@@ -19,7 +19,7 @@ The libcasm-global package provides generically useful tools used by CASM:
 
 #### Usage
 
-See the [libcasm-global docs](https://prisms-center.github.io/CASMcode_pydocs/libcasm/global/2.0/html/index.html).
+See the [libcasm docs](https://prisms-center.github.io/CASMcode_pydocs/libcasm/overview/latest/).
 
 
 #### About CASM
@@ -34,8 +34,3 @@ For more information, see the [CASM homepage](https://prisms-center.github.io/CA
 #### License
 
 GNU Lesser General Public License (LGPL). Please see the file LICENSE for details.
-
-
-#### For Contributors
-
-See the [libcasm contribution guide](https://prisms-center.github.io/CASMcode_docs/pages/contributing_to_libcasm_packages/)
