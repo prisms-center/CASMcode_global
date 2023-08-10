@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [2.0.3] - 2023-08-10
+
+### Changed
+
+- Updated project metadata and README
+
+### Removed
+
+- Removed CONTRIBUTE.md. This information is now included on the CASM website.
+
+
 ## [2.0.2] - 2023-08-09
 
 ### Changed
