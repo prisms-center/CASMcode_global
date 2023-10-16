@@ -65,8 +65,8 @@ endif()
 ### libcasm_testing ###
 set(
   libcasm_testing_SOURCES
-  ${PROJECT_SOURCE_DIR}/unit/autotools.cc
   ${PROJECT_SOURCE_DIR}/unit/testdir.cc
+  ${PROJECT_SOURCE_DIR}/unit/autotools.cc
 )
 add_library(casm_testing SHARED ${libcasm_testing_SOURCES})
 target_include_directories(casm_testing
@@ -90,10 +90,10 @@ enable_testing()
 # casm_unit_casm_io
 add_executable(casm_unit_casm_io
   ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
-  ${PROJECT_SOURCE_DIR}/unit/casm_io/DataFormatter_test.cpp
-  ${PROJECT_SOURCE_DIR}/unit/casm_io/EnumIO_test.cpp
   ${PROJECT_SOURCE_DIR}/unit/casm_io/Log_test.cpp
   ${PROJECT_SOURCE_DIR}/unit/casm_io/jsonParser_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/casm_io/DataFormatter_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/casm_io/EnumIO_test.cpp
 )
 target_link_libraries(casm_unit_casm_io
   gtest_all
