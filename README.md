@@ -1,4 +1,4 @@
-<img alt="Shows the CASM logo" src="https://raw.githubusercontent.com/prisms-center/CASMcode_global/main/python/doc/_static/logo.svg" width="600" />
+<img alt="Shows the CASM logo" src="https://raw.githubusercontent.com/seshasaibehara/CASMcode_global/LogoUpdate/python/doc/_static/logo.svg" width="600" />
 
 #### libcasm-global
 
