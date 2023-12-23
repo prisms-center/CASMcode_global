@@ -151,6 +151,7 @@ add_test(NAME casm_unit_global COMMAND casm_unit_global)
 add_executable(casm_unit_misc
   ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
   ${PROJECT_SOURCE_DIR}/unit/misc/string_algorithm_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/misc/CASM_math_test.cpp
   ${PROJECT_SOURCE_DIR}/unit/misc/cloneable_ptr_test.cpp
 )
 target_link_libraries(casm_unit_misc

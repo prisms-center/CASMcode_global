@@ -17,6 +17,9 @@
 #include <complex>
 #include <vector>
 
+// debug
+#include <iostream>
+
 namespace CASM {
 
 namespace CASM_TMP {
@@ -232,6 +235,7 @@ std::vector<IntType> index_to_kcombination(IntType ind, IntType k) {
   IntType big, bigger;
   for (; k > 0; --k) {
     n = k;
+    big = 0;
     bigger = 1;
     while (bigger <= ind) {
       big = bigger;
