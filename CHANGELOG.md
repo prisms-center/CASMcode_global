@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix index_to_kcombination  (933735c)
+
+### Updated
+
+- Updated docs theme
+
+### Added
+
+- Building wheel for Python3.12
+
 
 ## [2.0.3] - 2023-08-10
 

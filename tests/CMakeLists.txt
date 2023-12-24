@@ -89,11 +89,11 @@ enable_testing()
 ################################################################
 # casm_unit_casm_io
 add_executable(casm_unit_casm_io
-  ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
   ${PROJECT_SOURCE_DIR}/unit/casm_io/DataFormatter_test.cpp
   ${PROJECT_SOURCE_DIR}/unit/casm_io/EnumIO_test.cpp
   ${PROJECT_SOURCE_DIR}/unit/casm_io/Log_test.cpp
   ${PROJECT_SOURCE_DIR}/unit/casm_io/jsonParser_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
 )
 target_link_libraries(casm_unit_casm_io
   gtest_all
@@ -111,8 +111,8 @@ add_test(NAME casm_unit_casm_io COMMAND casm_unit_casm_io)
 ################################################################
 # casm_unit_container
 add_executable(casm_unit_container
-  ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
   ${PROJECT_SOURCE_DIR}/unit/container/Counter_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
 )
 target_link_libraries(casm_unit_container
   gtest_all
@@ -130,8 +130,8 @@ add_test(NAME casm_unit_container COMMAND casm_unit_container)
 ################################################################
 # casm_unit_global
 add_executable(casm_unit_global
-  ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
   ${PROJECT_SOURCE_DIR}/unit/global/version_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
 )
 target_link_libraries(casm_unit_global
   gtest_all
@@ -150,9 +150,9 @@ add_test(NAME casm_unit_global COMMAND casm_unit_global)
 # casm_unit_misc
 add_executable(casm_unit_misc
   ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
-  ${PROJECT_SOURCE_DIR}/unit/misc/string_algorithm_test.cpp
   ${PROJECT_SOURCE_DIR}/unit/misc/CASM_math_test.cpp
   ${PROJECT_SOURCE_DIR}/unit/misc/cloneable_ptr_test.cpp
+  ${PROJECT_SOURCE_DIR}/unit/misc/string_algorithm_test.cpp
 )
 target_link_libraries(casm_unit_misc
   gtest_all

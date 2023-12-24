@@ -17,9 +17,6 @@
 #include <complex>
 #include <vector>
 
-// debug
-#include <iostream>
-
 namespace CASM {
 
 namespace CASM_TMP {
