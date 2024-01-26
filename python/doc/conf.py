@@ -1,7 +1,9 @@
+import os
+
 # -- package specific configuration --
 project = "libcasm-global"
-version = "2.0" # The short X.Y version.
-release = "2.0.3" # The full version, including alpha/beta/rc tags.
+version = "2.0"  # The short X.Y version.
+release = "2.0.4"  # The full version, including alpha/beta/rc tags.
 project_desc = "CASM global constants and tools"
 logo_text = "libcasm-global"
 github_url = "https://github.com/prisms-center/CASMcode_global/"
@@ -25,7 +27,6 @@ intersphinx_libcasm_packages = []
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import os
 
 # -- General configuration ------------------------------------------------
 
@@ -160,7 +161,7 @@ html_theme_options = {
             "url": pypi_url,  # required
             "icon": "fa-brands fa-python",
             "type": "fontawesome",
-        }
+        },
     ],
 }
 # Add any paths that contain custom static files (such as style sheets) here,
