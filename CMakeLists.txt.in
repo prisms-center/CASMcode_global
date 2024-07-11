@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version")
 
-project(CASMcode_global VERSION 2.0.4 LANGUAGES CXX)
+project(CASMcode_global VERSION 2.0.5 LANGUAGES CXX)
 
 # set CMAKE_INSTALL_X variables
 include(GNUInstallDirs)
