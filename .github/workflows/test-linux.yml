@@ -1,6 +1,10 @@
 name: Testing on ubuntu-latest
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 12 * * 7'
 
 env:
   SKBUILD_CONFIGURE_OPTIONS: -DCMAKE_CXX_FLAGS='-D_GLIBCXX_USE_CXX11_ABI=0'
