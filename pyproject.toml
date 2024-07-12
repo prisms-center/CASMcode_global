@@ -10,7 +10,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "libcasm-global"
-version = "2.0.4"
+version = "2.0.5"
 authors = [
   { name="CASM developers", email="casm-developers@lists.engr.ucsb.edu" },
 ]
@@ -38,14 +38,13 @@ source-dir = "doc"
 build-dir  = "doc/build"
 all_files  = 1
 
+[tool.ruff.lint]
+select = ["NPY201", "E", "F", "I"]
 
-[tool.ruff]
-select = ["E", "F", "I"]
-
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["libcasm", "casm"]
 
 
