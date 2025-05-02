@@ -10,13 +10,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "libcasm-global"
-version = "2.0.5"
+version = "2.0.6"
 authors = [
   { name="CASM developers", email="casm-developers@lists.engr.ucsb.edu" },
 ]
 description = "Constants, definitions, and generically useful tools used by CASM"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.9,<3.14"
 license = {text = "LGPL2.1+"}
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -49,8 +49,8 @@ known-first-party = ["libcasm", "casm"]
 
 
 [tool.cibuildwheel]
-# Build for python3.9, 3.10, 3.11, 3.12
-build = "cp39-* cp310-* cp311-* cp312-*"
+# Build for python3.9, 3.10, 3.11, 3.12, 3.13
+build = "cp39-* cp310-* cp311-* cp312-* cp313-*"
 # Build for cpython only
 skip =  "pp*"
 
