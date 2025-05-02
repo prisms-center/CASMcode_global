@@ -21,7 +21,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: dist_linux
+          name: dist_linux_x86_64
           path: ./wheelhouse/*.whl
 
   build_wheels_linux_aarch64:
@@ -38,7 +38,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: dist_linux
+          name: dist_linux_aarch64
           path: ./wheelhouse/*.whl
 
   build_wheels_macos13_x86_64:
