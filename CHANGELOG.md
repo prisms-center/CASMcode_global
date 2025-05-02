@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Restrict requires-python to ">=3.9,<3.14"
 - Run CI tests using Python 3.13
 - Build MacOS arm64 wheels using MacOS 15
+- Build Linux wheels using Ubuntu 24.04
 
 
 ## [2.0.5] - 2024-07-11
