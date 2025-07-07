@@ -51,8 +51,6 @@ known-first-party = ["libcasm", "casm"]
 [tool.cibuildwheel]
 # Build for python3.9, 3.10, 3.11, 3.12, 3.13
 build = "cp39-* cp310-* cp311-* cp312-* cp313-*"
-# Build for cpython only
-skip =  "pp*"
 
 # Checkout submodules
 before-all = "git submodule update --init --recursive"
@@ -67,4 +65,4 @@ environment = { MACOSX_DEPLOYMENT_TARGET="10.15" }
 
 [tool.cibuildwheel.linux]
 # dependencies do not build for musl
-skip = ["pp* *musllinux*"]
+skip = ["*musllinux*"]
