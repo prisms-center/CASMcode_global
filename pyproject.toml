@@ -4,13 +4,13 @@ requires = [
     "scikit-build",
     "cmake>=3.20",
     "ninja",
-    "pybind11~=2.8"
+    "pybind11~=3.0"
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "libcasm-global"
-version = "2.1.0"
+version = "2.2.0"
 authors = [
   { name="CASM developers", email="casm-developers@lists.engr.ucsb.edu" },
 ]
