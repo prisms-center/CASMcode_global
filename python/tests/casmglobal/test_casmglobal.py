@@ -16,4 +16,4 @@ def test_PLANK():
 
 
 def test_libcasm_global_version():
-    assert casmglobal.libcasm_global_version() == "2.2.0"
+    assert casmglobal.libcasm_global_version() == "2.3.0"
