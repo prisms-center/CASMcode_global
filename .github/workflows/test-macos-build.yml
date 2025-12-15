@@ -39,9 +39,9 @@ jobs:
         run: |
           python -m pytest -rsap python/tests
 
-      - name: upload libcasm-global-macos-latest-x86_64-dist
+      - name: upload libcasm-global-macos-latest-dist
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: libcasm-global-macos-latest-x86_64-dist
+          name: libcasm-global-macos-latest-dist
           path: dist
