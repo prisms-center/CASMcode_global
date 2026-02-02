@@ -455,6 +455,7 @@ set(
   ${PROJECT_SOURCE_DIR}/include/casm/global/enum/stream_io.hh
   ${PROJECT_SOURCE_DIR}/include/casm/global/errors.hh
   ${PROJECT_SOURCE_DIR}/include/casm/global/filesystem.hh
+  ${PROJECT_SOURCE_DIR}/include/casm/global/threads.hh
   ${PROJECT_SOURCE_DIR}/include/casm/global/version.hh
   ${PROJECT_SOURCE_DIR}/include/casm/misc/CASM_Array_math.hh
   ${PROJECT_SOURCE_DIR}/include/casm/misc/CASM_Eigen_math.hh
