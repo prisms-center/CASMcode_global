@@ -130,6 +130,7 @@ add_test(NAME casm_unit_container COMMAND casm_unit_container)
 ################################################################
 # casm_unit_global
 add_executable(casm_unit_global
+  ${PROJECT_SOURCE_DIR}/unit/global/threads_test.cpp
   ${PROJECT_SOURCE_DIR}/unit/global/version_test.cpp
   ${PROJECT_SOURCE_DIR}/unit/gtest_main_run_all.cpp
 )
