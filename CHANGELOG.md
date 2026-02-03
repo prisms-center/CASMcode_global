@@ -5,6 +5,16 @@ All notable changes to `libcasm-global` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-02-03
+
+### Added
+
+- Added CASM::threaded_run and CASM::threaded_pipeline methods to run threaded loops and pipelines in C++.
+- Added get_max_threads, set_max_threads, reset_max_threads to libcasm.global to get/set a configuration parameter that can be used to control the number of threads used by CASM methods that support multithreading and check the configuration parameter value.
+- Added stop_requested, request_stop, and reset_stop_requested methods to libcasm.global for sending/receiving stop signals to running threaded loops and pipelines. 
+- Added CASMpy::run_with_sigint_handler method to allow C++ extension functions to check for stop requests triggered by SIGINT signals (i.e. Ctrl+C) received by the calling Python process.
+
+
 ## [2.3.0] - 2025-12-15
 
 ### Changed
