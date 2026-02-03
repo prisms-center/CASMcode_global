@@ -12,6 +12,7 @@
 
 // CASM
 #include "casm/global/definitions.hh"
+#include "casm/global/threads.hh"
 #include "casm/global/version.hh"
 
 #define STRINGIFY(x) #x
@@ -25,6 +26,11 @@ namespace CASMpy {
 using namespace CASM;
 
 double default_tol() { return TOL; }
+
+// Thread configuration and stop-request wrappers
+Index get_max_threads_val() { return get_max_threads(); }
+
+bool stop_requested_val() { return stop_requested(); }
 
 }  // namespace CASMpy
 
@@ -52,6 +58,39 @@ PYBIND11_MODULE(_casmglobal, m) {
 
   m.def("libcasm_global_version", &libcasm_global_version, R"pbdoc(
       The -lcasm_global version.
+      )pbdoc");
+
+  // Thread configuration bindings
+  m.def("get_max_threads", &get_max_threads_val, R"pbdoc(
+      A global configuration variable indicating the maximum number of
+      threads to use in multithreaded CASM functions.
+
+      By default, this is set to the number of hardware threads.
+      )pbdoc");
+  m.def("set_max_threads", &set_max_threads, R"pbdoc(
+      Set the global configuration variable indicating the maximum number of
+      threads to use in multithreaded CASM functions.
+
+      Parameters
+      ----------
+      n_threads : int
+          The maximum number of threads to use.
+      )pbdoc",
+        py::arg("n_threads"));
+  m.def("reset_max_threads", &reset_max_threads, R"pbdoc(
+      Reset the maximum number of threads to hardware concurrency.
+      )pbdoc");
+
+  // Stop-request bindings
+  m.def("stop_requested", &stop_requested_val, R"pbdoc(
+      A flag indicating whether a global stop has been requested (e.g. via
+      :func:`request_stop`).
+      )pbdoc");
+  m.def("request_stop", &request_stop, R"pbdoc(
+      Request a global stop; sets the :func:`stop_requested` flag.
+      )pbdoc");
+  m.def("reset_stop_requested", &reset_stop_requested, R"pbdoc(
+      Reset the :func:`stop_requested` flag to False.
       )pbdoc");
 
 #ifdef VERSION_INFO

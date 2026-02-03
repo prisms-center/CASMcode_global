@@ -3,7 +3,15 @@
 from ._casmglobal import KB as _KB
 from ._casmglobal import PLANCK as _PLANCK
 from ._casmglobal import TOL as _TOL
-from ._casmglobal import libcasm_global_version
+from ._casmglobal import (
+    libcasm_global_version,
+    get_max_threads,
+    set_max_threads,
+    reset_max_threads,
+    stop_requested,
+    request_stop,
+    reset_stop_requested,
+)
 
 TOL = _TOL
 """Default CASM tolerance"""

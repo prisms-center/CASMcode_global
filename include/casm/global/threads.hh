@@ -3,6 +3,7 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <csignal>
 #include <exception>
 #include <mutex>
 #include <optional>
@@ -46,9 +47,11 @@ inline void set_max_threads(Index n_threads) {
   max_threads = n_threads;
 }
 
+inline volatile std::sig_atomic_t sigint_requested = 0;
+
 /// \brief An atomic flag indicating whether a stop has been requested, for
 ///     example by ctrl-c / SIGINT.
-inline std::atomic<bool>& get_stop_requested() {
+inline std::atomic<bool> &get_stop_requested() {
   // Global or static so the signal handler can see it
   static std::atomic<bool> global_stop_requested{false};
   return global_stop_requested;
@@ -57,19 +60,25 @@ inline std::atomic<bool>& get_stop_requested() {
 /// \brief Reset the stop requested flag to false
 inline void reset_stop_requested() {
   static std::atomic<bool> &stop_requested = get_stop_requested();
-  stop_requested.store(false);
+  stop_requested.store(false, std::memory_order_relaxed);
+  sigint_requested = 0;
 }
 
 /// \brief Set the stop requested flag to true
 inline void request_stop() {
   static std::atomic<bool> &stop_requested = get_stop_requested();
-  stop_requested.store(true);
+  stop_requested.store(true, std::memory_order_relaxed);
+  // Mirror into signal-safe flag for immediate visibility to code
+  // that polls only the sig_atomic_t.
+  sigint_requested = 1;
 }
 
 /// \brief Check whether a stop has been requested
 inline bool stop_requested() {
   static std::atomic<bool> &stop_requested = get_stop_requested();
-  return stop_requested.load();
+  // Consider either the atomic or the signal-safe flag.
+  return stop_requested.load(std::memory_order_relaxed) ||
+         sigint_requested != 0;
 }
 
 /// \brief Run a range-based worker either serially or in parallel
@@ -129,7 +138,7 @@ static void threaded_run(Index n, RangeWorker &&worker) {
     start = end;
   }
 
-  for (auto& th : threads) {
+  for (auto &th : threads) {
     if (th.joinable()) th.join();
   }
 
@@ -418,7 +427,7 @@ static void threaded_pipeline(
 
   // Join all threads
   controller_th.join();
-  for (auto& th : workers)
+  for (auto &th : workers)
     if (th.joinable()) th.join();
 
   if (first_exception) std::rethrow_exception(first_exception);
