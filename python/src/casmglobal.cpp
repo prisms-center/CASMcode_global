@@ -27,11 +27,6 @@ using namespace CASM;
 
 double default_tol() { return TOL; }
 
-// Thread configuration and stop-request wrappers
-Index get_max_threads_val() { return get_max_threads(); }
-
-bool stop_requested_val() { return stop_requested(); }
-
 }  // namespace CASMpy
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
@@ -61,7 +56,10 @@ PYBIND11_MODULE(_casmglobal, m) {
       )pbdoc");
 
   // Thread configuration bindings
-  m.def("get_max_threads", &get_max_threads_val, R"pbdoc(
+  m.def("get_max_threads", &max_threads, R"pbdoc(
+      This is equivalent to :func:`max_threads`.
+      )pbdoc");
+  m.def("max_threads", &max_threads, R"pbdoc(
       A global configuration variable indicating the maximum number of
       threads to use in multithreaded CASM functions.
 
@@ -82,7 +80,7 @@ PYBIND11_MODULE(_casmglobal, m) {
       )pbdoc");
 
   // Stop-request bindings
-  m.def("stop_requested", &stop_requested_val, R"pbdoc(
+  m.def("stop_requested", &stop_requested, R"pbdoc(
       A flag indicating whether a global stop has been requested (e.g. via
       :func:`request_stop`).
       )pbdoc");

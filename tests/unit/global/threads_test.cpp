@@ -13,7 +13,7 @@ using namespace CASM;
 
 TEST(ThreadsTest, ThreadedRunSerial) {
   // Save/restore global setting
-  Index orig = get_max_threads();
+  Index orig = max_threads();
   set_max_threads(1);
 
   const Index n = 10;
@@ -36,7 +36,7 @@ TEST(ThreadsTest, ThreadedRunSerial) {
 }
 
 TEST(ThreadsTest, ThreadedRunParallel) {
-  Index orig = get_max_threads();
+  Index orig = max_threads();
   // Request multiple threads to exercise the parallel path
   set_max_threads(4);
 
@@ -61,7 +61,7 @@ TEST(ThreadsTest, ThreadedRunParallel) {
 }
 
 TEST(ThreadsTest, ThreadedPipelineSerial) {
-  Index orig = get_max_threads();
+  Index orig = max_threads();
   set_max_threads(1);
 
   const Index N = 100;
@@ -93,7 +93,7 @@ TEST(ThreadsTest, ThreadedPipelineSerial) {
 }
 
 TEST(ThreadsTest, ThreadedPipelineParallelBounded) {
-  Index orig = get_max_threads();
+  Index orig = max_threads();
   set_max_threads(4);
 
   const Index N = 1000;
@@ -128,7 +128,7 @@ TEST(ThreadsTest, ThreadedPipelineParallelBounded) {
 
 // New tests to verify request_stop() and stop_requested() behavior
 TEST(ThreadsTest, RequestStopThreadedRun) {
-  Index orig = get_max_threads();
+  Index orig = max_threads();
   set_max_threads(4);
   reset_stop_requested();
 
@@ -162,7 +162,7 @@ TEST(ThreadsTest, RequestStopThreadedRun) {
 }
 
 TEST(ThreadsTest, RequestStopThreadedPipeline) {
-  Index orig = get_max_threads();
+  Index orig = max_threads();
   set_max_threads(4);
   reset_stop_requested();
 

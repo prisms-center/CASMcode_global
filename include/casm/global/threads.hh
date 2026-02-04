@@ -14,12 +14,13 @@
 #include <vector>
 
 #include "casm/global/definitions.hh"
+#include "casm/global/eigen.hh"
 
 namespace CASM {
 
 /// \brief A global configuration variable indicating the maximum number of
 ///     threads to use in CASM.
-Index &get_max_threads();
+Index max_threads();
 
 /// \brief Reset the maximum number of threads to the hardware concurrency
 void reset_max_threads();
@@ -27,28 +28,44 @@ void reset_max_threads();
 /// \brief Set the maximum number of threads to use
 void set_max_threads(Index n_threads);
 
-inline volatile std::sig_atomic_t sigint_requested = 0;
-
-/// \brief An atomic flag indicating whether a stop has been requested, for
-///     example by ctrl-c / SIGINT.
-std::atomic<bool> &get_stop_requested();
-
 /// \brief Reset the stop requested flag to false
 void reset_stop_requested();
 
 /// \brief Set the stop requested flag to true
 void request_stop();
 
-/// \brief Check whether a stop has been requested
+//// \brief Check whether a stop has been requested or SIGINT received
 bool stop_requested();
+
+/// \brief RAII helper to temporarily set Eigen's thread count
+class EigenThreadLimiter {
+ public:
+  // Sets threads to 'n' and stores the previous value
+  // A value of 0 lets Eigen decide the thread count (usually hardware
+  // concurrency)
+  explicit EigenThreadLimiter(int n) {
+    m_previous = Eigen::nbThreads();
+    Eigen::setNbThreads(n);
+  }
+
+  // Automatically restores previous thread count on destruction
+  ~EigenThreadLimiter() { Eigen::setNbThreads(m_previous); }
+
+  // Delete copy/assignment to prevent accidental resource leaks
+  EigenThreadLimiter(const EigenThreadLimiter &) = delete;
+  EigenThreadLimiter &operator=(const EigenThreadLimiter &) = delete;
+
+ private:
+  int m_previous;
+};
 
 /// \brief Run a range-based worker either serially or in parallel
 ///
 /// Configuration:
-///  - Uses get_max_threads() to determine number of threads to use.
-///  - If get_max_threads() is 1, runs the worker serially in the calling
+///  - Uses max_threads() to determine number of threads to use.
+///  - If max_threads() is 1, runs the worker serially in the calling
 ///    thread.
-///  - If get_max_threads() > 1, divides the range [0, n) into approximately
+///  - If max_threads() > 1, divides the range [0, n) into approximately
 ///    equal sub-ranges and runs the worker in multiple threads.
 ///  - If stop_requested() returns true before starting a worker thread, that
 ///    thread will not be started; if stop_requested() returns true within a
@@ -59,10 +76,12 @@ bool stop_requested();
 ///
 template <typename RangeWorker>
 static void threaded_run(Index n, RangeWorker &&worker) {
+  Eigen::initParallel();  // Just in case
+  EigenThreadLimiter(1);  // Prevent Eigen from using extra threads
+
   if (n <= 0) return;
 
-  Index max_threads = get_max_threads();
-  Index n_threads = std::min<Index>(n, std::max<Index>(1, max_threads));
+  Index n_threads = std::min<Index>(n, std::max<Index>(1, max_threads()));
 
   // Fast serial path
   if (n_threads == 1) {
@@ -123,7 +142,7 @@ static void threaded_run(Index n, RangeWorker &&worker) {
 ///  - Merger must be callable with signature: void merger(Result result);
 ///
 /// Behavior:
-///  - Uses get_max_threads() to determine total threads; if that is 1 the
+///  - Uses max_threads() to determine total threads; if that is 1 the
 ///    pipeline runs serially in the calling thread.
 ///  - Exceptions thrown by any thread are captured and the first is
 ///    rethrown on return after threads are joined.
@@ -147,13 +166,15 @@ static void threaded_pipeline(
     TaskProducer &&producer, Worker &&worker, Merger &&merger,
     std::optional<Index> task_queue_max_size = std::nullopt,
     std::optional<Index> result_queue_max_size = std::nullopt) {
+  Eigen::initParallel();  // Just in case
+  EigenThreadLimiter(1);  // Prevent Eigen from using extra threads
+
   using TaskOpt = std::decay_t<decltype(producer())>;
   // Expect TaskOpt to be std::optional<Task>
   using Task = typename TaskOpt::value_type;
   using Result = std::decay_t<decltype(worker(std::declval<Task>(), 0))>;
 
-  Index max_threads = get_max_threads();
-  Index total_threads = std::max<Index>(1, max_threads);
+  Index total_threads = std::max<Index>(1, max_threads());
   // Serial fallback: produce, process, merge inline
   if (total_threads == 1) {
     while (true) {

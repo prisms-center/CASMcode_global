@@ -6,11 +6,12 @@ from ._casmglobal import TOL as _TOL
 from ._casmglobal import (
     libcasm_global_version,
     get_max_threads,
-    set_max_threads,
-    reset_max_threads,
-    stop_requested,
+    max_threads,
     request_stop,
+    reset_max_threads,
     reset_stop_requested,
+    set_max_threads,
+    stop_requested,
 )
 
 TOL = _TOL

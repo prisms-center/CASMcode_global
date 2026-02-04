@@ -11,7 +11,7 @@ extern "C" inline void libcasm_handle_sigint(int /*sig*/) {
   const char msg[] = "\nReceived Interrupt! Requesting stop...\n\n";
   ssize_t ignored = write(STDOUT_FILENO, msg, sizeof(msg) - 1);
   (void)ignored;
-  CASM::sigint_requested = 1;
+  CASM::request_stop();
 }
 
 /// CASM - Python binding code
@@ -47,15 +47,9 @@ decltype(auto) run_with_sigint_handler(F &&f) {
       return std::forward<F>(f)();
     }();
     PyOS_setsig(SIGINT, old_handler);
-    if (sigint_requested) {
-      request_stop();
-    }
     return res;
   } catch (...) {
     PyOS_setsig(SIGINT, old_handler);
-    if (sigint_requested) {
-      request_stop();
-    }
     throw;
   }
 }
