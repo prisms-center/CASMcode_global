@@ -3,7 +3,7 @@ import os
 # -- package specific configuration --
 project = "libcasm-global"
 version = "2.4"  # The short X.Y version.
-release = "2.4.0"  # The full version, including alpha/beta/rc tags.
+release = "2.4.1"  # The full version, including alpha/beta/rc tags.
 project_desc = "CASM global constants and tools"
 logo_text = "libcasm-global"
 github_url = "https://github.com/prisms-center/CASMcode_global/"
