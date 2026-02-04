@@ -497,6 +497,7 @@ set(
   ${PROJECT_SOURCE_DIR}/src/casm/global/enum/io_traits.cc
   ${PROJECT_SOURCE_DIR}/src/casm/global/enum/json_io.cc
   ${PROJECT_SOURCE_DIR}/src/casm/global/enum/stream_io.cc
+  ${PROJECT_SOURCE_DIR}/src/casm/global/threads.cc
   ${PROJECT_SOURCE_DIR}/src/casm/global/version.cc
   ${PROJECT_SOURCE_DIR}/src/casm/misc/CASM_Array_math.cc
   ${PROJECT_SOURCE_DIR}/src/casm/misc/CASM_Eigen_math.cc
