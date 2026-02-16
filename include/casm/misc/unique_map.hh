@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <map>
+#include <type_traits>
 
 #include "casm/misc/CASM_TMP.hh"
 #include "casm/misc/cloneable_ptr.hh"
@@ -20,8 +21,8 @@ class UniqueMapIterator {
  public:
   typedef std::bidirectional_iterator_tag iterator_category;
   typedef typename MapIteratorType::difference_type difference_type;
-  typedef typename std::result_of<TransformFunc(
-      typename MapIteratorType::reference)>::type reference;
+  typedef typename std::invoke_result<
+      TransformFunc, typename MapIteratorType::reference>::type reference;
   typedef typename std::remove_reference<reference>::type value_type;
   typedef value_type *pointer;
 

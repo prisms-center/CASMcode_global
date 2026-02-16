@@ -5,12 +5,13 @@ All notable changes to `libcasm-global` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.4.1] - 2026-02-04
+## [Unreleased]
 
 ### Fixed
 
 - Fixed scope of the max_threads variable in libcasm.global to ensure it is shared globally.
 - Reworked use of atomic variables for stop_requested to only use std::atomic_bool if the implementation is lock-free.
+- Replace std::result_of (deprecated in C++17, removed in C++20) with std::invoke_result to fix warnings.
 
 
 ## [2.4.0] - 2026-02-03
