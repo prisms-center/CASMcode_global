@@ -4,6 +4,8 @@
 #include <chrono>
 #include <numeric>
 #include <optional>
+#include <set>
+#include <shared_mutex>
 #include <thread>
 #include <vector>
 
@@ -115,13 +117,208 @@ TEST(ThreadsTest, ThreadedPipelineParallelBounded) {
   };
 
   // Use bounded queues to exercise blocking behavior
-  threaded_pipeline(producer, worker, merger, std::optional<Index>(16),
-                    std::optional<Index>(16));
+  threaded_pipeline(producer, worker, merger, 16);
 
   // expected sum = sum_{i=0..N-1} (i+1) = N*(N+1)/2
   long long expected =
       static_cast<long long>(N) * (static_cast<long long>(N) + 1) / 2;
   EXPECT_EQ(sum.load(), expected);
+
+  set_max_threads(orig);
+}
+
+/// Stress test for the bounded-task / unbounded-result configuration of
+/// threaded_pipeline. This matches the configuration used by
+/// MakeAllSubgroupsFromGenerators::run() in CASMcode_configuration
+/// (task_queue_max_size = max_threads()+10).
+///
+/// The suspected deadlock (Suspect 1 in thread_locking_notes.md) arises because
+/// task_cv is shared between:
+///   - workers waiting for items  (!task_queue.empty())
+///   - the controller waiting for space  (task_queue.size() < max_size)
+/// A task_cv.notify_one() from a worker that just popped a task may wake
+/// another idle worker instead of the controller, leaving the controller
+/// blocked forever.
+///
+/// The test hangs (does not assert-fail) on a deadlock, consistent with what is
+/// observed in the CASMcode_configuration stress tests.
+TEST(ThreadsTest, PipelineBoundedTaskUnboundedResultStress) {
+  Index orig = max_threads();
+  set_max_threads(8);
+
+  const Index N_tasks = 500;
+  const Index N_repeat = 200;
+
+  for (Index rep = 0; rep < N_repeat; ++rep) {
+    std::atomic<Index> produced{0};
+
+    auto producer = [&]() -> std::optional<Index> {
+      Index cur = produced.fetch_add(1, std::memory_order_relaxed);
+      if (cur >= N_tasks) return std::nullopt;
+      return cur;
+    };
+
+    auto worker = [](Index task, Index /*worker_id*/) -> Index { return task; };
+
+    std::atomic<long long> sum{0};
+    auto merger = [&](Index res) {
+      sum.fetch_add(static_cast<long long>(res), std::memory_order_relaxed);
+    };
+
+    // bounded task queue, unbounded result queue — matches subgroup finder
+    threaded_pipeline(producer, worker, merger,
+                      /*task_queue_max_size=*/max_threads() + 10);
+
+    long long expected = static_cast<long long>(N_tasks) *
+                         (static_cast<long long>(N_tasks) - 1) / 2;
+    ASSERT_EQ(sum.load(), expected) << "Wrong sum on repetition " << rep;
+  }
+
+  set_max_threads(orig);
+}
+
+/// Stress test that adds a shared_mutex contention pattern to the worker,
+/// simulating how MakeAllSubgroupsFromGenerators workers access the shared
+/// `subgroups` map: many shared_lock reads, rare unique_lock writes.
+///
+/// If the deadlock is purely in threaded_pipeline mechanics, this test should
+/// also hang. If it passes, the bug requires something specific to the
+/// MakeAllSubgroupsFromGenerators worker logic (e.g., tree traversal state).
+TEST(ThreadsTest, PipelineBoundedTaskSharedMutexStress) {
+  Index orig = max_threads();
+  set_max_threads(8);
+
+  const Index N_tasks = 500;
+  const Index N_repeat = 200;
+  // Simulated shared "found set" — workers read-check and occasionally write,
+  // mirroring subgroups_count() / subgroups_emplace() in the real code.
+  std::shared_mutex found_mutex;
+  std::set<Index> found_set;
+
+  for (Index rep = 0; rep < N_repeat; ++rep) {
+    found_set.clear();
+    std::atomic<Index> produced{0};
+
+    auto producer = [&]() -> std::optional<Index> {
+      Index cur = produced.fetch_add(1, std::memory_order_relaxed);
+      if (cur >= N_tasks) return std::nullopt;
+      return cur;
+    };
+
+    // Worker: do CPU work (simulate tree traversal) plus shared_mutex accesses
+    // (simulate subgroups_count / subgroups_emplace).
+    auto worker = [&](Index task, Index /*worker_id*/) -> Index {
+      // Simulate ~10 subgroup-check iterations per task.
+      for (Index i = 0; i < 10; ++i) {
+        Index key = task * 10 + i;
+        // Read check (shared lock) — most iterations.
+        {
+          std::shared_lock lk(found_mutex);
+          if (found_set.count(key)) continue;
+        }
+        // Write (unique lock) — occasional.
+        {
+          std::unique_lock lk(found_mutex);
+          found_set.insert(key);
+        }
+      }
+      return task;
+    };
+
+    std::atomic<long long> sum{0};
+    auto merger = [&](Index res) {
+      sum.fetch_add(static_cast<long long>(res), std::memory_order_relaxed);
+    };
+
+    threaded_pipeline(producer, worker, merger,
+                      /*task_queue_max_size=*/max_threads() + 10);
+
+    long long expected = static_cast<long long>(N_tasks) *
+                         (static_cast<long long>(N_tasks) - 1) / 2;
+    ASSERT_EQ(sum.load(), expected) << "Wrong sum on repetition " << rep;
+  }
+
+  set_max_threads(orig);
+}
+
+/// Regression test for the task_cv wakeup-stealing deadlock in
+/// threaded_pipeline.
+///
+/// Root cause: task_cv is shared between:
+///   - workers waiting for items  (!task_queue.empty())
+///   - the controller waiting for space  (task_queue.size() < max_size)
+/// When a worker pops a task and calls task_cv.notify_one(), the notification
+/// may wake another idle worker (also waiting on task_cv for items) instead of
+/// the controller (waiting on task_cv for space). If all workers become idle
+/// and the controller is also waiting for space, nobody wakes the controller,
+/// and the pipeline deadlocks permanently.
+///
+/// This test is designed to reproduce that deadlock. With the buggy
+/// implementation it should hang (and the per-rep timeout will fire, causing
+/// the test to fail). After the fix (splitting task_cv into task_item_cv and
+/// task_space_cv) the test should pass reliably.
+///
+/// Parameters match the real failing scenario in CASMcode_configuration:
+///   max_threads=12, n_workers=11, task_queue_max_size=22, n_tasks=100,
+///   trivial (instant) workers.
+TEST(ThreadsTest, PipelineBoundedDeadlockRegression) {
+  Index orig = max_threads();
+  set_max_threads(12);
+
+  const Index N_tasks = 100;
+  const Index N_repeat = 50;
+  const auto PER_REP_TIMEOUT = std::chrono::seconds(5);
+
+  for (Index rep = 0; rep < N_repeat; ++rep) {
+    std::atomic<Index> produced{0};
+
+    auto producer = [&]() -> std::optional<Index> {
+      Index cur = produced.fetch_add(1, std::memory_order_relaxed);
+      if (cur >= N_tasks) return std::nullopt;
+      return cur;
+    };
+
+    // Workers sleep briefly so the controller can fill the task queue to
+    // capacity and block on task_cv waiting for space. Without this delay,
+    // workers drain tasks faster than the controller produces them; the queue
+    // never fills, the controller never blocks, and the race cannot occur.
+    auto worker = [](Index task, Index /*worker_id*/) -> Index {
+      std::this_thread::sleep_for(std::chrono::microseconds(200));
+      return task;
+    };
+
+    std::atomic<long long> sum{0};
+    auto merger = [&](Index res) {
+      sum.fetch_add(static_cast<long long>(res), std::memory_order_relaxed);
+    };
+
+    std::atomic<bool> done{false};
+    std::thread pipeline_thread([&]() {
+      threaded_pipeline(producer, worker, merger,
+                        /*task_queue_max_size=*/max_threads() + 10);
+      done.store(true, std::memory_order_release);
+    });
+
+    auto deadline = std::chrono::steady_clock::now() + PER_REP_TIMEOUT;
+    while (!done.load(std::memory_order_acquire) &&
+           std::chrono::steady_clock::now() < deadline) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+
+    if (!done.load(std::memory_order_acquire)) {
+      // Pipeline deadlocked — detach to avoid blocking join, then fail.
+      pipeline_thread.detach();
+      set_max_threads(orig);
+      ASSERT_TRUE(false) << "threaded_pipeline deadlocked on rep " << rep
+                         << " (task_cv wakeup-stealing bug)";
+    }
+
+    pipeline_thread.join();
+
+    long long expected = static_cast<long long>(N_tasks) *
+                         (static_cast<long long>(N_tasks) - 1) / 2;
+    ASSERT_EQ(sum.load(), expected) << "Wrong sum on rep " << rep;
+  }
 
   set_max_threads(orig);
 }
@@ -192,8 +389,7 @@ TEST(ThreadsTest, RequestStopThreadedPipeline) {
     request_stop();
   });
 
-  threaded_pipeline(producer, worker, merger, std::optional<Index>(64),
-                    std::optional<Index>(64));
+  threaded_pipeline(producer, worker, merger, 64);
 
   stopper.join();
 
