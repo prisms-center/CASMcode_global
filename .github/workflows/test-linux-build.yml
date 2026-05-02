@@ -47,7 +47,7 @@ jobs:
 
       - name: upload libcasm-global-ubuntu-latest-x86_64-dist
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: libcasm-global-ubuntu-latest-x86_64-dist
           path: dist
