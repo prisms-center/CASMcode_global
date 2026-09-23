@@ -46,10 +46,14 @@ def main():
     # 1. Check all workflow runs on the release branch
     print(f"Checking workflow runs on branch '{branch}'...")
     output = gh(
-        "run", "list",
-        "--branch", branch,
-        "--json", "workflowName,status,conclusion,databaseId",
-        "--limit", "50",
+        "run",
+        "list",
+        "--branch",
+        branch,
+        "--json",
+        "workflowName,status,conclusion,databaseId",
+        "--limit",
+        "50",
     )
     runs = json.loads(output)
 
@@ -83,7 +87,7 @@ def main():
         print("\nCould not find a 'Build wheels' workflow run. Aborting.")
         sys.exit(1)
 
-    print(f"\nAll workflows passed.")
+    print("\nAll workflows passed.")
 
     # 2. Download artifacts into a temporary directory, then flatten
     raw_dir = f"dist/{version}_raw"
@@ -112,7 +116,7 @@ def main():
 
     shutil.rmtree(tmp_dir)
     print(f"\nArtifacts written to '{raw_dir}/'.")
-    print(f"\nNext steps:")
+    print("\nNext steps:")
     print(f"  python label_wheels.py {version}")
     print(f"  python -m twine upload dist/{version}/*")
 
