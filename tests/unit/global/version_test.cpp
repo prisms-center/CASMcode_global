@@ -23,7 +23,7 @@ TEST(VersionTest, Test1) {
   EXPECT_EQ(v_match.size(), 6);
   EXPECT_EQ(v_match[1].str(), "2");
   EXPECT_EQ(v_match[2].str(), "4");
-  EXPECT_EQ(v_match[3].str(), "1");
+  EXPECT_EQ(v_match[3].str(), "2");
   EXPECT_EQ(v_match[4].str(), "");
 
   std::cout << "CASM::version(): " << CASM::version() << std::endl;
