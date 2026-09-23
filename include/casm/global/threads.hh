@@ -154,8 +154,9 @@ static void threaded_run(Index n, RangeWorker &&worker) {
 /// \param merger The result merger function, which acts on each produced
 /// result.
 /// \param task_queue_max_size Optional upper bound on how many tasks the
-///        controller will buffer; `std::nullopt` (default) means unbounded;
-///        a present positive value imposes a blocking bound.
+///        producer will buffer. If `std::nullopt` (default), or less than
+///        the number of worker threads, the number of worker threads
+///        (max_threads() - 1) is used.
 template <typename TaskProducer, typename Worker, typename Merger>
 static void threaded_pipeline(
     TaskProducer &&producer, Worker &&worker, Merger &&merger,

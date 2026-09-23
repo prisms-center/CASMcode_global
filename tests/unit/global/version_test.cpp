@@ -27,6 +27,6 @@ TEST(VersionTest, Test1) {
   EXPECT_EQ(v_match[4].str(), "");
 
   std::cout << "CASM::version(): " << CASM::version() << std::endl;
-  EXPECT_EQ(CASM::version(), "2.4.1");
+  EXPECT_EQ(CASM::version(), "2.4.2");
   EXPECT_EQ(CASM::version(), casm_global_version());
 }

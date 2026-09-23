@@ -5,6 +5,16 @@ All notable changes to `libcasm-global` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.2] - 2026-09-23
+
+### Fixed
+
+- Fixed a race condition in CASM::threaded_pipeline that could cause a hang.
+- CASM::threaded_pipeline now calls request_stop() if an exception is thrown by the producer, worker, or merger.
+- Removed the unused `result_queue_max_size` parameter from CASM::threaded_pipeline.
+- Fixed a deprecation warning in the bundled nlohmann/json.hpp (whitespace in literal operator declarations).
+
+
 ## [2.4.1] - 2026-02-25
 
 ### Fixed
