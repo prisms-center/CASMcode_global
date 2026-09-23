@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""
+r"""
 CASM release workflow script.
 
 Run from the root directory of the package repository after all changes are
 committed on the version branch and all GitHub Actions workflows have passed.
 
 Usage:
-    python ../release.py <version> --dev-branch <2.X|3.X> [options]
+    python ../CASMcode_global/dev/release.py <version> \
+        --dev-branch <2.X|3.X> [options]
 
 Steps:
-    1 - Download artifacts, label wheels (libcasm- only), upload to PyPI
+    1 - Download artifacts, label wheels (libcasm- only, except
+        libcasm-global), upload to PyPI
     2 - Install from PyPI and run tests
     3 - Create and push version tag
     4 - Create GitHub release
@@ -17,9 +19,12 @@ Steps:
     6 - Build and push documentation
 
 Examples:
-    python ../release.py 2.4.0 --dev-branch 2.X --pydocs ../CASMcode_pydocs
-    python ../release.py 2.4.0 --dev-branch 2.X --pydocs ../CASMcode_pydocs --start-step 3
-    python ../release.py 2.4.0 --dev-branch 2.X --pydocs ../CASMcode_pydocs --steps 1,2
+    python ../CASMcode_global/dev/release.py 2.4.0 --dev-branch 2.X \
+        --pydocs ../CASMcode_pydocs
+    python ../CASMcode_global/dev/release.py 2.4.0 --dev-branch 2.X \
+        --pydocs ../CASMcode_pydocs --start-step 3
+    python ../CASMcode_global/dev/release.py 2.4.0 --dev-branch 2.X \
+        --pydocs ../CASMcode_pydocs --steps 1,2
 """
 
 import argparse

@@ -5,14 +5,17 @@ branch, then download build_wheels.yml artifacts into dist/<version>_raw/.
 Run from within the package repository directory.
 
 Usage:
-    python ../download_release.py <version>
+    python ../CASMcode_global/dev/download_release.py <version>
 
 Example:
-    python ../download_release.py 2.3.1
+    python ../CASMcode_global/dev/download_release.py 2.3.1
 
 After running, continue with:
     python label_wheels.py <version>
     python -m twine upload dist/<version>/*
+
+For libcasm-global, which has no label_wheels.py, instead move
+dist/<version>_raw/ to dist/<version>/ before uploading.
 """
 
 import json
@@ -34,7 +37,7 @@ def gh(*args):
 
 def main():
     if len(sys.argv) != 2:
-        print("Usage: python ../download_release.py <version>")
+        print("Usage: python ../CASMcode_global/dev/download_release.py <version>")
         sys.exit(1)
 
     version = sys.argv[1]
