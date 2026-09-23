@@ -29,7 +29,6 @@ import re
 import shutil
 import subprocess
 import sys
-import textwrap
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -121,7 +120,7 @@ def short_name(package_name):
     """Return the short name used in docs paths (strip libcasm- or casm- prefix)."""
     for prefix in ("libcasm-", "casm-"):
         if package_name.startswith(prefix):
-            return package_name[len(prefix):]
+            return package_name[len(prefix) :]
     return package_name
 
 
@@ -200,7 +199,7 @@ def _download_and_label_libcasm(version, package_name):
 
     label_script = "label_wheels.py"
     if not os.path.exists(label_script):
-        abort(f"label_wheels.py not found in current directory.")
+        abort("label_wheels.py not found in current directory.")
 
     print(f"\nRunning: python {label_script} {version}")
     rc = run_interactive([sys.executable, label_script, version])
@@ -267,7 +266,16 @@ def _download_pure_python(version):
 
     print(f"\nDownloading artifacts from 'Build' run {build_run_id}...")
     rc = run_interactive(
-        ["gh", "run", "download", str(build_run_id), "--name", "dist", "--dir", dist_dir]
+        [
+            "gh",
+            "run",
+            "download",
+            str(build_run_id),
+            "--name",
+            "dist",
+            "--dir",
+            dist_dir,
+        ]
     )
     if rc != 0:
         abort("Failed to download artifacts.")
@@ -292,12 +300,11 @@ def step_download_and_upload(version, package_name):
     if not confirm("\nUpload to PyPI with twine?"):
         abort("Upload cancelled.")
 
-    rc = run_interactive(
-        [sys.executable, "-m", "twine", "upload", f"{dist_dir}/*"]
-    )
+    rc = run_interactive([sys.executable, "-m", "twine", "upload", f"{dist_dir}/*"])
     if rc != 0:
         # twine may need shell glob expansion
         import glob
+
         files = glob.glob(f"{dist_dir}/*")
         rc = run_interactive([sys.executable, "-m", "twine", "upload"] + files)
         if rc != 0:
@@ -321,7 +328,14 @@ def step_install_and_test(version, package_name):
 
     print(f"\nRunning: pip install --upgrade {package_name}=={version}")
     rc = run_interactive(
-        [sys.executable, "-m", "pip", "install", "--upgrade", f"{package_name}=={version}"]
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "--upgrade",
+            f"{package_name}=={version}",
+        ]
     )
     if rc != 0:
         if not confirm("pip install failed. Continue anyway?", default=False):
@@ -429,12 +443,12 @@ def step_merge_branches(version, dev_branch, remote):
     header("Step 5: Merge branches")
 
     tag = f"v{version}"
-    print(f"\nPlan:")
-    print(f"  1. git checkout main && git pull")
+    print("\nPlan:")
+    print("  1. git checkout main && git pull")
     print(f"  2. git merge --ff-only {tag}")
     print(f"  3. git push {remote} main")
     print(f"  4. git checkout {dev_branch} && git pull {remote} {dev_branch}")
-    print(f"  5. git merge main --no-edit")
+    print("  5. git merge main --no-edit")
     print(f"  6. git push {remote} {dev_branch}")
 
     if not confirm("\nProceed?"):
@@ -455,7 +469,7 @@ def step_merge_branches(version, dev_branch, remote):
         abort()
 
     # Merge tag into main
-    print(f"\nChecking out main...")
+    print("\nChecking out main...")
     rc = run_interactive(["git", "checkout", "main"])
     if rc != 0:
         abort("Failed to checkout main.")
@@ -494,7 +508,7 @@ def step_merge_branches(version, dev_branch, remote):
     if rc != 0:
         abort(f"Failed to push {dev_branch} to {remote}.")
 
-    print(f"\nBranches merged and pushed.")
+    print("\nBranches merged and pushed.")
 
 
 # ---------------------------------------------------------------------------
@@ -576,7 +590,7 @@ def step_build_docs(version, package_name, pydocs_path, dev_branch):
     if updated:
         print(f"  Updated {overview_rst}")
     else:
-        print(f"  Warning: could not auto-update version in overview RST.")
+        print("  Warning: could not auto-update version in overview RST.")
         print(f"  Please manually update {overview_rst}")
         print(f"  (set version for {package_name} to [{version}])")
         input("  Press Enter when done... ")
