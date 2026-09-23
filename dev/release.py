@@ -176,7 +176,7 @@ def check_git_clean():
 # ---------------------------------------------------------------------------
 
 
-def _download_and_label_libcasm(version):
+def _download_and_label_libcasm(version, package_name):
     """Use download_release.py + label_wheels.py for C++ extension packages."""
     download_script = os.path.join(SCRIPT_DIR, "download_release.py")
     if not os.path.exists(download_script):
@@ -186,6 +186,17 @@ def _download_and_label_libcasm(version):
     rc = run_interactive([sys.executable, download_script, version])
     if rc != 0:
         abort("download_release.py failed.")
+
+    # libcasm-global has no CASM library dependencies for auditwheel to
+    # bundle, so its wheels do not need relabeling: use them as-is.
+    if package_name == "libcasm-global":
+        raw_dir = f"dist/{version}_raw"
+        dist_dir = f"dist/{version}"
+        if os.path.exists(dist_dir):
+            abort(f"'{dist_dir}' already exists. Remove it and try again.")
+        print(f"\nNo relabeling needed; moving {raw_dir}/ to {dist_dir}/")
+        shutil.move(raw_dir, dist_dir)
+        return
 
     label_script = "label_wheels.py"
     if not os.path.exists(label_script):
@@ -269,7 +280,7 @@ def step_download_and_upload(version, package_name):
     header("Step 1: Download artifacts and upload to PyPI")
 
     if is_libcasm_package(package_name):
-        _download_and_label_libcasm(version)
+        _download_and_label_libcasm(version, package_name)
     else:
         _download_pure_python(version)
 
