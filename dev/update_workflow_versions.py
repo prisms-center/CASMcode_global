@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Update CASM dependency versions in GitHub workflow files.
+r"""Update CASM dependency versions in GitHub workflow files.
 
 Handles three patterns in .github/workflows/*.yml files:
 
@@ -16,15 +16,18 @@ Handles three patterns in .github/workflows/*.yml files:
        pip install libcasm-global==2.2.0
        ->           libcasm-global==2.4.1
 
-Usage:
-    python update_workflow_versions.py --libcasm-global 2.4.1 --libcasm-xtal 2.3.0
+Release (2.4.1) and pre-release (3.0a1, 3.0.0b2, 3.0rc1) versions are
+supported, both as the current and as the new version.
+
+Usage (from the package repository root):
+    python ../CASMcode_global/dev/update_workflow_versions.py \
+        --libcasm-global 2.4.1 --libcasm-xtal 3.0a1
 """
 
 import argparse
 import re
 import sys
 from pathlib import Path
-
 
 # Maps pip package name -> checkout path used in the workflow files
 PACKAGES = {
@@ -38,27 +41,30 @@ PACKAGES = {
 }
 
 
+# Release or pre-release version, e.g. 2.4.1, 3.0a1, 3.0.0b2, 3.0rc1
+VERSION = r"\d+(?:\.\d+)*(?:(?:a|b|rc)\d+)?"
+
+# Cache key form of VERSION, e.g. v2-4-1, v3-0a1
+CACHE_KEY = r"v\d+(?:-\d+)*(?:(?:a|b|rc)\d+)?"
+
+
 def version_to_cache_key(version):
-    """Convert '2.4.1' -> 'v2-4-1'."""
+    """Convert '2.4.1' -> 'v2-4-1', '3.0a1' -> 'v3-0a1'."""
     return "v" + version.replace(".", "-")
 
 
-def update_file(path, updates):
-    """Apply version updates to one workflow file.
+def apply_updates(content, updates):
+    """Return workflow file content with version updates applied.
 
     updates: dict mapping pip package name -> new version string
-
-    Returns True if the file was changed.
     """
-    original = content = path.read_text()
-
     for pkg, new_ver in updates.items():
         repo_path = PACKAGES[pkg]
         new_key = version_to_cache_key(new_ver)
 
         # 1. Cache keys: libcasm-global-v2-2-0 -> libcasm-global-v2-4-1
         content = re.sub(
-            rf"{re.escape(pkg)}-v\d+-\d+-\d+",
+            rf"{re.escape(pkg)}-{CACHE_KEY}\b",
             f"{pkg}-{new_key}",
             content,
         )
@@ -67,22 +73,19 @@ def update_file(path, updates):
         #      path: CASMcode_global
         #      ref: v2.2.0
         content = re.sub(
-            rf"(path: {re.escape(repo_path)}\n\s+ref: )v[\d.]+",
+            rf"(path: {re.escape(repo_path)}\n\s+ref: )v{VERSION}\b",
             rf"\g<1>v{new_ver}",
             content,
         )
 
         # 3. Pip install versions: libcasm-global==2.2.0 -> libcasm-global==2.4.1
         content = re.sub(
-            rf"{re.escape(pkg)}==[\d.]+",
+            rf"{re.escape(pkg)}=={VERSION}\b",
             f"{pkg}=={new_ver}",
             content,
         )
 
-    if content != original:
-        path.write_text(content)
-        return True
-    return False
+    return content
 
 
 def main():
@@ -114,6 +117,11 @@ def main():
     for pkg in PACKAGES:
         ver = getattr(args, pkg.replace("-", "_"))
         if ver:
+            if not re.fullmatch(VERSION, ver):
+                parser.error(
+                    f"invalid version for --{pkg}: {ver!r} "
+                    "(expected e.g. 2.4.1 or 3.0a1, without a leading 'v')"
+                )
             updates[pkg] = ver
 
     if not updates:
@@ -128,28 +136,11 @@ def main():
     changed = []
     for yml in sorted(workflows_dir.glob("*.yml")):
         original = yml.read_text()
-        if args.dry_run:
-            # Simulate update to check if it would change
-            content = original
-            for pkg, new_ver in updates.items():
-                repo_path = PACKAGES[pkg]
-                new_key = version_to_cache_key(new_ver)
-                content = re.sub(
-                    rf"{re.escape(pkg)}-v\d+-\d+-\d+", f"{pkg}-{new_key}", content
-                )
-                content = re.sub(
-                    rf"(path: {re.escape(repo_path)}\n\s+ref: )v[\d.]+",
-                    rf"\g<1>v{new_ver}",
-                    content,
-                )
-                content = re.sub(
-                    rf"{re.escape(pkg)}==[\d.]+", f"{pkg}=={new_ver}", content
-                )
-            if content != original:
-                changed.append(yml)
-        else:
-            if update_file(yml, updates):
-                changed.append(yml)
+        content = apply_updates(original, updates)
+        if content != original:
+            if not args.dry_run:
+                yml.write_text(content)
+            changed.append(yml)
 
     if changed:
         label = "Would update" if args.dry_run else "Updated"
